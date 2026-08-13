@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+            import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sun, Moon, Frame, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
@@ -336,27 +336,35 @@ export default function App() {
             </div>
           )}
 
-          {/* B & C. PREVIEW BINGKAI & UPLOAD FOTO (Jika bingkai sudah ada, namun foto belum disatukan) */}
+          {/* B & C. PREVIEW BINGKAI & UPLOAD FOTO (Bagian ini yang disempurnakan) */}
           {frameImg && !userImg && (
             <div className="space-y-6">
+              
               {/* Preview Bingkai di Atas */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-700">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
-                    <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain" />
-                  </div>
+              <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-700">
+                
+                {/* 1. SEBELAH KIRI: Gambar Preview Thumbnail (Fixed Size) */}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
+                  <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain" />
+                </div>
+
+                {/* 2. SEBELAH KANAN: Teks Ukuran (Atas) & Tombol Ganti (Bawah) */}
+                <div className="flex flex-col items-start gap-2 min-w-0">
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Dimensi Asli Bingkai:</p>
-                    <p className="text-base font-bold text-gray-800 dark:text-gray-100">
-                      {frameDimensions.width} x {frameDimensions.height} px
+                    <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-100 truncate">
+                      {frameDimensions.width} × {frameDimensions.height} px
                     </p>
                   </div>
+
+                  {/* Tombol diletakkan persis di bawah teks */}
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors active:scale-95">
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Ganti Bingkai</span>
+                    <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
+                  </label>
                 </div>
-                <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors">
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Ganti Bingkai</span>
-                  <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
-                </label>
+
               </div>
 
               {/* Langkah Kedua: Drop Area Upload Foto */}
@@ -510,4 +518,4 @@ export default function App() {
 
     </div>
   );
-}
+}   
