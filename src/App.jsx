@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Sun,
   Moon,
@@ -31,6 +31,7 @@ export default function App() {
   // FILE / IMAGE
   // =========================================================
   const [frameImg, setFrameImg] = useState(null);
+
   const [frameDimensions, setFrameDimensions] = useState({
     width: 0,
     height: 0
@@ -47,7 +48,7 @@ export default function App() {
   });
 
   // =========================================================
-  // CANVAS
+  // CANVAS STATE
   // =========================================================
   const [scale, setScale] = useState(1);
 
@@ -61,9 +62,20 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false);
 
   // =========================================================
-  // REFS
+  // REFERENCES
   // =========================================================
   const canvasRef = useRef(null);
+
+  const frameImgRef = useRef(null);
+  const userImgRef = useRef(null);
+
+  // Nilai transformasi realtime.
+  // TIDAK menggunakan React state setiap pointer move.
+  const transformRef = useRef({
+    x: 0,
+    y: 0,
+    scale: 1
+  });
 
   const pointersRef = useRef(new Map());
 
@@ -79,6 +91,8 @@ export default function App() {
     startDistance: 0,
     startScale: 1
   });
+
+  const animationFrameRef = useRef(null);
 
   // =========================================================
   // THEME
@@ -158,11 +172,8 @@ export default function App() {
 
       let hasAlpha = false;
 
-      /*
-       * Sampling pixel agar tidak terlalu berat
-       * untuk PNG resolusi sangat besar.
-       */
       const pixelCount = data.length / 4;
+
       const step = Math.max(
         1,
         Math.floor(pixelCount / 100000)
@@ -193,6 +204,8 @@ export default function App() {
         return;
       }
 
+      frameImgRef.current = img;
+
       setFrameImg(img);
 
       setFrameDimensions({
@@ -200,7 +213,11 @@ export default function App() {
         height: img.naturalHeight
       });
 
-      setUserImg(null);
+      transformRef.current = {
+        x: 0,
+        y: 0,
+        scale: 1
+      };
 
       setScale(1);
 
@@ -208,6 +225,9 @@ export default function App() {
         x: 0,
         y: 0
       });
+
+      setUserImg(null);
+      userImgRef.current = null;
 
       setIsLocked(false);
 
@@ -253,7 +273,15 @@ export default function App() {
     const img = new Image();
 
     img.onload = () => {
+      userImgRef.current = img;
+
       setUserImg(img);
+
+      transformRef.current = {
+        x: 0,
+        y: 0,
+        scale: 1
+      };
 
       setScale(1);
 
@@ -287,56 +315,81 @@ export default function App() {
   // =========================================================
   // DRAW CANVAS
   // =========================================================
-  useEffect(() => {
-    if (!canvasRef.current || !frameImg) return;
-
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
+    const frame = frameImgRef.current;
+    const user = userImgRef.current;
+
+    if (!canvas || !frame) return;
+
     const ctx = canvas.getContext('2d');
 
-    const width = frameDimensions.width || 1080;
-    const height = frameDimensions.height || 1080;
+    const width =
+      frame.naturalWidth ||
+      frame.width ||
+      1080;
 
-    /*
-     * Canvas tetap memakai resolusi asli bingkai.
-     */
-    canvas.width = width;
-    canvas.height = height;
+    const height =
+      frame.naturalHeight ||
+      frame.height ||
+      1080;
 
-    ctx.clearRect(0, 0, width, height);
+    if (
+      canvas.width !== width ||
+      canvas.height !== height
+    ) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    ctx.clearRect(
+      0,
+      0,
+      width,
+      height
+    );
 
     // =======================================================
-    // FOTO USER
+    // USER PHOTO
     // =======================================================
-    if (userImg) {
+    if (user) {
+      const {
+        x,
+        y,
+        scale: currentScale
+      } = transformRef.current;
+
       ctx.save();
 
       ctx.translate(
-        width / 2 + position.x,
-        height / 2 + position.y
+        width / 2 + x,
+        height / 2 + y
       );
 
-      ctx.scale(scale, scale);
+      ctx.scale(
+        currentScale,
+        currentScale
+      );
 
       const aspect =
-        userImg.naturalWidth /
-        userImg.naturalHeight;
+        user.naturalWidth /
+        user.naturalHeight;
 
       let drawWidth = width;
-      let drawHeight = width / aspect;
+      let drawHeight =
+        width / aspect;
 
-      /*
-       * Cover canvas supaya tidak ada area kosong.
-       */
       if (drawHeight < height) {
         drawHeight = height;
-        drawWidth = height * aspect;
+        drawWidth =
+          height * aspect;
       }
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
       ctx.drawImage(
-        userImg,
+        user,
         -drawWidth / 2,
         -drawHeight / 2,
         drawWidth,
@@ -357,7 +410,7 @@ export default function App() {
         : 1;
 
     ctx.drawImage(
-      frameImg,
+      frame,
       0,
       0,
       width,
@@ -365,15 +418,71 @@ export default function App() {
     );
 
     ctx.restore();
+  }, [isInteracting, isLocked]);
+
+  // =========================================================
+  // SCHEDULE CANVAS DRAW
+  // =========================================================
+  const scheduleDraw = useCallback(() => {
+    if (animationFrameRef.current !== null) {
+      return;
+    }
+
+    animationFrameRef.current =
+      requestAnimationFrame(() => {
+        animationFrameRef.current = null;
+        drawCanvas();
+      });
+  }, [drawCanvas]);
+
+  // =========================================================
+  // DRAW WHEN IMAGE / STATE CHANGES
+  // =========================================================
+  useEffect(() => {
+    frameImgRef.current = frameImg;
+  }, [frameImg]);
+
+  useEffect(() => {
+    userImgRef.current = userImg;
+  }, [userImg]);
+
+  useEffect(() => {
+    transformRef.current.x = position.x;
+    transformRef.current.y = position.y;
+    transformRef.current.scale = scale;
+
+    scheduleDraw();
+  }, [
+    position,
+    scale,
+    scheduleDraw
+  ]);
+
+  useEffect(() => {
+    scheduleDraw();
   }, [
     frameImg,
     userImg,
     frameDimensions,
-    position,
-    scale,
     isInteracting,
-    isLocked
+    isLocked,
+    scheduleDraw
   ]);
+
+  // =========================================================
+  // CLEANUP RAF
+  // =========================================================
+  useEffect(() => {
+    return () => {
+      if (
+        animationFrameRef.current !== null
+      ) {
+        cancelAnimationFrame(
+          animationFrameRef.current
+        );
+      }
+    };
+  }, []);
 
   // =========================================================
   // POINTER DISTANCE
@@ -386,7 +495,7 @@ export default function App() {
   };
 
   // =========================================================
-  // CANVAS DISPLAY SCALE
+  // CANVAS SCALE FACTOR
   // =========================================================
   const getCanvasFactor = () => {
     const canvas = canvasRef.current;
@@ -405,20 +514,27 @@ export default function App() {
   // POINTER DOWN
   // =========================================================
   const handlePointerDown = (e) => {
-    if (isLocked || !userImg) return;
+    if (isLocked || !userImgRef.current) {
+      return;
+    }
 
     e.preventDefault();
 
     const canvas = e.currentTarget;
 
     try {
-      canvas.setPointerCapture(e.pointerId);
+      canvas.setPointerCapture(
+        e.pointerId
+      );
     } catch (error) {}
 
-    pointersRef.current.set(e.pointerId, {
-      clientX: e.clientX,
-      clientY: e.clientY
-    });
+    pointersRef.current.set(
+      e.pointerId,
+      {
+        clientX: e.clientX,
+        clientY: e.clientY
+      }
+    );
 
     setIsInteracting(true);
 
@@ -427,10 +543,11 @@ export default function App() {
     );
 
     // =======================================================
-    // TWO FINGERS = ZOOM
+    // TWO FINGER
     // =======================================================
     if (pointers.length === 2) {
-      gestureRef.current.mode = 'zoom';
+      gestureRef.current.mode =
+        'zoom';
 
       gestureRef.current.startDistance =
         getDistance(
@@ -438,15 +555,17 @@ export default function App() {
           pointers[1]
         );
 
-      gestureRef.current.startScale = scale;
+      gestureRef.current.startScale =
+        transformRef.current.scale;
 
       return;
     }
 
     // =======================================================
-    // ONE FINGER / MOUSE = DRAG
+    // ONE FINGER / MOUSE
     // =======================================================
-    gestureRef.current.mode = 'pan';
+    gestureRef.current.mode =
+      'pan';
 
     gestureRef.current.startX =
       e.clientX;
@@ -455,35 +574,40 @@ export default function App() {
       e.clientY;
 
     gestureRef.current.startPositionX =
-      position.x;
+      transformRef.current.x;
 
     gestureRef.current.startPositionY =
-      position.y;
+      transformRef.current.y;
   };
 
   // =========================================================
   // POINTER MOVE
   // =========================================================
   const handlePointerMove = (e) => {
-    if (isLocked || !userImg) return;
-
-    if (!pointersRef.current.has(e.pointerId)) {
+    if (
+      isLocked ||
+      !userImgRef.current ||
+      !pointersRef.current.has(e.pointerId)
+    ) {
       return;
     }
 
     e.preventDefault();
 
-    pointersRef.current.set(e.pointerId, {
-      clientX: e.clientX,
-      clientY: e.clientY
-    });
+    pointersRef.current.set(
+      e.pointerId,
+      {
+        clientX: e.clientX,
+        clientY: e.clientY
+      }
+    );
 
     const pointers = Array.from(
       pointersRef.current.values()
     );
 
     // =======================================================
-    // TWO FINGER ZOOM
+    // TWO FINGER PINCH ZOOM
     // =======================================================
     if (pointers.length >= 2) {
       const distance = getDistance(
@@ -507,14 +631,21 @@ export default function App() {
           5
         );
 
-        setScale(newScale);
+        /*
+         * Langsung ubah ref.
+         * Tidak setState.
+         */
+        transformRef.current.scale =
+          newScale;
+
+        scheduleDraw();
       }
 
       return;
     }
 
     // =======================================================
-    // DRAG
+    // PAN / DRAG
     // =======================================================
     if (
       gestureRef.current.mode !==
@@ -534,15 +665,19 @@ export default function App() {
     const factor =
       getCanvasFactor();
 
-    setPosition({
-      x:
-        gestureRef.current.startPositionX +
-        dx * factor,
+    transformRef.current.x =
+      gestureRef.current.startPositionX +
+      dx * factor;
 
-      y:
-        gestureRef.current.startPositionY +
-        dy * factor
-    });
+    transformRef.current.y =
+      gestureRef.current.startPositionY +
+      dy * factor;
+
+    /*
+     * Hanya render maksimal satu kali
+     * setiap frame layar.
+     */
+    scheduleDraw();
   };
 
   // =========================================================
@@ -557,36 +692,52 @@ export default function App() {
       pointersRef.current.values()
     );
 
+    // =======================================================
+    // SEMUA JARI SUDAH LEPAS
+    // =======================================================
     if (pointers.length === 0) {
       gestureRef.current.mode =
         'none';
+
+      /*
+       * Baru sekarang React state
+       * diperbarui.
+       */
+      setScale(
+        transformRef.current.scale
+      );
+
+      setPosition({
+        x: transformRef.current.x,
+        y: transformRef.current.y
+      });
 
       setIsInteracting(false);
 
       return;
     }
 
-    /*
-     * Setelah pinch selesai dan tersisa
-     * satu jari, lanjutkan sebagai drag.
-     */
+    // =======================================================
+    // PINCH -> SATU JARI
+    // =======================================================
     if (pointers.length === 1) {
-      const p = pointers[0];
+      const pointer =
+        pointers[0];
 
       gestureRef.current.mode =
         'pan';
 
       gestureRef.current.startX =
-        p.clientX;
+        pointer.clientX;
 
       gestureRef.current.startY =
-        p.clientY;
+        pointer.clientY;
 
       gestureRef.current.startPositionX =
-        position.x;
+        transformRef.current.x;
 
       gestureRef.current.startPositionY =
-        position.y;
+        transformRef.current.y;
     }
   };
 
@@ -604,15 +755,29 @@ export default function App() {
       gestureRef.current.mode =
         'none';
 
+      setScale(
+        transformRef.current.scale
+      );
+
+      setPosition({
+        x: transformRef.current.x,
+        y: transformRef.current.y
+      });
+
       setIsInteracting(false);
     }
   };
 
   // =========================================================
-  // WHEEL ZOOM DESKTOP
+  // WHEEL ZOOM
   // =========================================================
   const handleWheel = (e) => {
-    if (isLocked || !userImg) return;
+    if (
+      isLocked ||
+      !userImgRef.current
+    ) {
+      return;
+    }
 
     e.preventDefault();
 
@@ -621,27 +786,45 @@ export default function App() {
         ? 1.08
         : 0.92;
 
-    setScale((prev) =>
+    transformRef.current.scale =
       Math.min(
         Math.max(
-          prev * zoomFactor,
+          transformRef.current.scale *
+            zoomFactor,
           0.2
         ),
         5
-      )
-    );
+      );
+
+    scheduleDraw();
   };
 
   // =========================================================
-  // PROCESS
+  // PROCESS TWIBBON
   // =========================================================
   const handleProcessTwibbon = () => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      return;
+    }
 
     setIsProcessing(true);
 
     setTimeout(() => {
       setIsProcessing(false);
+
+      /*
+       * Pastikan state terakhir tersimpan
+       * sebelum dikunci.
+       */
+      setScale(
+        transformRef.current.scale
+      );
+
+      setPosition({
+        x: transformRef.current.x,
+        y: transformRef.current.y
+      });
+
       setIsLocked(true);
 
       setAlert({
@@ -752,33 +935,6 @@ export default function App() {
   };
 
   // =========================================================
-  // RESET FRAME
-  // =========================================================
-  const resetFrame = () => {
-    setFrameImg(null);
-    setUserImg(null);
-
-    setFrameDimensions({
-      width: 0,
-      height: 0
-    });
-
-    setScale(1);
-
-    setPosition({
-      x: 0,
-      y: 0
-    });
-
-    setIsLocked(false);
-
-    setAlert({
-      type: '',
-      message: ''
-    });
-  };
-
-  // =========================================================
   // RENDER
   // =========================================================
   return (
@@ -820,15 +976,11 @@ export default function App() {
       </nav>
 
       {/* =====================================================
-          MAIN APP
-          INI SENGAJA DIBUAT SEMPIT DAN TERPUSAT.
-          DESKTOP TIDAK AKAN FULL SCREEN.
+          MAIN
       ====================================================== */}
       <main className="w-full max-w-2xl mx-auto px-4 sm:px-5 py-6 sm:py-8 flex-grow min-w-0">
 
-        {/* ===================================================
-            INTRO
-        ==================================================== */}
+        {/* INTRO */}
         <header className="text-center mb-8">
 
           <h1 className="text-2xl sm:text-3xl font-extrabold mb-3 text-gray-900 dark:text-white leading-tight">
@@ -841,14 +993,10 @@ export default function App() {
 
         </header>
 
-        {/* ===================================================
-            MAIN CARD
-        ==================================================== */}
+        {/* MAIN CARD */}
         <section className="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-4 sm:p-6 mb-8">
 
-          {/* =================================================
-              ALERT
-          ================================================== */}
+          {/* ALERT */}
           {alert.message && (
             <div
               className={`mb-5 p-3.5 rounded-xl flex items-start gap-3 text-xs sm:text-sm font-medium ${
@@ -872,7 +1020,7 @@ export default function App() {
           )}
 
           {/* =================================================
-              STEP 1
+              UPLOAD FRAME
           ================================================== */}
           {!frameImg && (
             <div className="space-y-3">
@@ -910,7 +1058,7 @@ export default function App() {
           )}
 
           {/* =================================================
-              STEP 2
+              FRAME + USER UPLOAD
           ================================================== */}
           {frameImg && !userImg && (
             <div className="space-y-6">
@@ -943,37 +1091,26 @@ export default function App() {
 
                   </div>
 
-                  <div className="flex gap-2 flex-wrap">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors">
 
-                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors">
+                    <RefreshCw className="w-3.5 h-3.5" />
 
-                      <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Ganti Bingkai</span>
 
-                      <span>Ganti Bingkai</span>
+                    <input
+                      type="file"
+                      accept="image/png"
+                      onChange={handleFrameUpload}
+                      className="hidden"
+                    />
 
-                      <input
-                        type="file"
-                        accept="image/png"
-                        onChange={handleFrameUpload}
-                        className="hidden"
-                      />
-
-                    </label>
-
-                    <button
-                      onClick={resetFrame}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600"
-                    >
-                      Reset
-                    </button>
-
-                  </div>
+                  </label>
 
                 </div>
 
               </div>
 
-              {/* UPLOAD USER PHOTO */}
+              {/* USER PHOTO */}
               <div className="space-y-3">
 
                 <h2 className="text-base sm:text-lg font-bold">
@@ -1037,10 +1174,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* =================================================
-                  CANVAS
-                  SELALU SATU KOLOM DAN TIDAK MELEBAR
-              ================================================== */}
+              {/* CANVAS */}
               <div
                 style={{
                   touchAction: 'none'
@@ -1064,9 +1198,7 @@ export default function App() {
 
               </div>
 
-              {/* =================================================
-                  BUTTONS
-              ================================================== */}
+              {/* BUTTONS */}
               <div className="w-full flex flex-col gap-3">
 
                 {!isLocked && (
