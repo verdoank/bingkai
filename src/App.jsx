@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Sun,
   Moon,
@@ -28,7 +28,7 @@ export default function App() {
   });
 
   // =========================================================
-  // IMAGE
+  // IMAGE STATE
   // =========================================================
   const [frameImg, setFrameImg] = useState(null);
   const [frameDimensions, setFrameDimensions] = useState({
@@ -46,7 +46,7 @@ export default function App() {
   });
 
   // =========================================================
-  // UI STATE
+  // EDITOR STATE
   // =========================================================
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({
@@ -66,18 +66,18 @@ export default function App() {
   const frameImgRef = useRef(null);
   const userImgRef = useRef(null);
 
-  // Transform realtime.
-  // Tidak memakai React state selama jari bergerak.
+  // Transform disimpan di ref supaya gesture tidak menyebabkan
+  // React render pada setiap gerakan jari.
   const transformRef = useRef({
     x: 0,
     y: 0,
     scale: 1
   });
 
-  // Pointer aktif
+  // Pointer aktif untuk mouse / touch / stylus.
   const pointersRef = useRef(new Map());
 
-  // Gesture
+  // Data gesture.
   const gestureRef = useRef({
     mode: 'none',
 
@@ -91,12 +91,11 @@ export default function App() {
     startScale: 1
   });
 
-  // RAF
+  // RequestAnimationFrame.
   const rafRef = useRef(null);
 
-  // Preview resolution.
-  // Sengaja dibatasi supaya HP tidak menggambar canvas
-  // 3000-4000px setiap frame ketika gesture berlangsung.
+  // Preview dibatasi supaya gesture ringan pada HP.
+  // Hasil download tetap resolusi asli.
   const PREVIEW_MAX_SIZE = 1200;
 
   // =========================================================
@@ -127,7 +126,7 @@ export default function App() {
   }, []);
 
   // =========================================================
-  // FRAME UPLOAD
+  // UPLOAD FRAME
   // =========================================================
   const handleFrameUpload = (e) => {
     const file = e.target.files?.[0];
@@ -156,6 +155,18 @@ export default function App() {
         willReadFrequently: true
       });
 
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+
+        setAlert({
+          type: 'error',
+          message:
+            'Browser tidak dapat memeriksa transparansi bingkai.'
+        });
+
+        return;
+      }
+
       ctx.drawImage(img, 0, 0);
 
       const imageData = ctx.getImageData(
@@ -171,8 +182,7 @@ export default function App() {
 
       const totalPixels = data.length / 4;
 
-      // Sampel maksimal 100.000 pixel agar proses upload
-      // tidak terlalu berat pada bingkai resolusi sangat besar.
+      // Sampling agar PNG besar tidak membuat HP berat.
       const step = Math.max(
         1,
         Math.floor(totalPixels / 100000)
@@ -209,8 +219,8 @@ export default function App() {
         height: img.naturalHeight
       });
 
-      setUserImg(null);
       userImgRef.current = null;
+      setUserImg(null);
 
       transformRef.current = {
         x: 0,
@@ -225,6 +235,7 @@ export default function App() {
 
       setScale(1);
       setIsLocked(false);
+      setIsInteracting(false);
 
       setAlert({
         type: 'success',
@@ -247,7 +258,7 @@ export default function App() {
   };
 
   // =========================================================
-  // USER IMAGE UPLOAD
+  // UPLOAD USER IMAGE
   // =========================================================
   const handleUserImgUpload = (e) => {
     const file = e.target.files?.[0];
@@ -284,6 +295,7 @@ export default function App() {
 
       setScale(1);
       setIsLocked(false);
+      setIsInteracting(false);
     };
 
     img.onerror = () => {
@@ -300,9 +312,9 @@ export default function App() {
   };
 
   // =========================================================
-  // GET PREVIEW SIZE
+  // PREVIEW SIZE
   // =========================================================
-  const getPreviewSize = () => {
+  const getPreviewSize = useCallback(() => {
     const frame = frameImgRef.current;
 
     if (!frame) {
@@ -315,11 +327,10 @@ export default function App() {
     const originalWidth = frame.naturalWidth;
     const originalHeight = frame.naturalHeight;
 
-    const largest =
-      Math.max(
-        originalWidth,
-        originalHeight
-      );
+    const largest = Math.max(
+      originalWidth,
+      originalHeight
+    );
 
     if (largest <= PREVIEW_MAX_SIZE) {
       return {
@@ -335,7 +346,7 @@ export default function App() {
       width: Math.round(originalWidth * ratio),
       height: Math.round(originalHeight * ratio)
     };
-  };
+  }, []);
 
   // =========================================================
   // DRAW PREVIEW
@@ -432,6 +443,7 @@ export default function App() {
     ctx.save();
 
     // Hanya transparan ketika benar-benar sedang disentuh.
+    // Setelah pointer dilepas, isInteracting = false.
     ctx.globalAlpha =
       isInteracting && !isLocked
         ? 0.65
@@ -446,10 +458,14 @@ export default function App() {
     );
 
     ctx.restore();
-  }, [isInteracting, isLocked]);
+  }, [
+    getPreviewSize,
+    isInteracting,
+    isLocked
+  ]);
 
   // =========================================================
-  // SCHEDULE DRAW
+  // REQUEST DRAW
   // =========================================================
   const scheduleDraw = useCallback(() => {
     if (rafRef.current !== null) {
@@ -464,7 +480,7 @@ export default function App() {
   }, [drawPreview]);
 
   // =========================================================
-  // INITIAL / IMAGE CHANGE DRAW
+  // INITIAL DRAW
   // =========================================================
   useEffect(() => {
     frameImgRef.current = frameImg;
@@ -476,9 +492,6 @@ export default function App() {
     scheduleDraw();
   }, [userImg, scheduleDraw]);
 
-  // =========================================================
-  // REDRAW WHEN INTERACTION STATE CHANGES
-  // =========================================================
   useEffect(() => {
     scheduleDraw();
   }, [
@@ -488,18 +501,20 @@ export default function App() {
   ]);
 
   // =========================================================
-  // CLEANUP RAF
+  // RAF CLEANUP
   // =========================================================
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
+        cancelAnimationFrame(
+          rafRef.current
+        );
       }
     };
   }, []);
 
   // =========================================================
-  // DISTANCE 2 POINTER
+  // DISTANCE
   // =========================================================
   const getDistance = (a, b) => {
     return Math.hypot(
@@ -509,7 +524,7 @@ export default function App() {
   };
 
   // =========================================================
-  // CANVAS MOVEMENT FACTOR
+  // MOVEMENT FACTOR
   // =========================================================
   const getMovementFactor = () => {
     const canvas = canvasRef.current;
@@ -521,11 +536,14 @@ export default function App() {
 
     if (!rect.width) return 1;
 
-    // Posisi disimpan berdasarkan resolusi asli.
-    return frameImgRef.current
-      ? frameImgRef.current.naturalWidth /
-          rect.width
-      : canvas.width / rect.width;
+    if (!frameImgRef.current) {
+      return canvas.width / rect.width;
+    }
+
+    return (
+      frameImgRef.current.naturalWidth /
+      rect.width
+    );
   };
 
   // =========================================================
@@ -581,7 +599,7 @@ export default function App() {
     }
 
     // =======================================================
-    // ONE FINGER / MOUSE
+    // SINGLE POINTER
     // =======================================================
     gestureRef.current.mode =
       'pan';
@@ -626,7 +644,7 @@ export default function App() {
     );
 
     // =======================================================
-    // PINCH ZOOM
+    // TWO FINGER PINCH
     // =======================================================
     if (pointers.length >= 2) {
       const distance = getDistance(
@@ -650,8 +668,6 @@ export default function App() {
           5
         );
 
-        // HANYA REF.
-        // Tidak memicu React render.
         transformRef.current.scale =
           newScale;
 
@@ -662,7 +678,7 @@ export default function App() {
     }
 
     // =======================================================
-    // PAN
+    // SINGLE FINGER PAN
     // =======================================================
     if (
       gestureRef.current.mode !==
@@ -712,13 +728,12 @@ export default function App() {
     );
 
     // =======================================================
-    // SEMUA JARI/MOUSE SUDAH LEPAS
+    // SEMUA POINTER LEPAS
     // =======================================================
     if (pointers.length === 0) {
       gestureRef.current.mode =
         'none';
 
-      // Simpan transform terakhir.
       setScale(
         transformRef.current.scale
       );
@@ -728,19 +743,17 @@ export default function App() {
         y: transformRef.current.y
       });
 
-      // INI PENTING:
-      // transparansi langsung kembali normal.
+      // Kembali normal.
       setIsInteracting(false);
 
       return;
     }
 
     // =======================================================
-    // DARI 2 JARI MENJADI 1 JARI
+    // 2 JARI -> 1 JARI
     // =======================================================
     if (pointers.length === 1) {
-      const pointer =
-        pointers[0];
+      const pointer = pointers[0];
 
       gestureRef.current.mode =
         'pan';
@@ -782,7 +795,6 @@ export default function App() {
         y: transformRef.current.y
       });
 
-      // Pastikan transparansi kembali normal.
       setIsInteracting(false);
     }
   };
@@ -815,16 +827,15 @@ export default function App() {
         5
       );
 
-    scheduleDraw();
-
-    // Simpan setelah wheel selesai secara visual.
     setScale(
       transformRef.current.scale
     );
+
+    scheduleDraw();
   };
 
   // =========================================================
-  // EXPORT FULL RESOLUTION
+  // FULL RESOLUTION EXPORT
   // =========================================================
   const createFullResolutionCanvas = () => {
     const frame = frameImgRef.current;
@@ -861,7 +872,7 @@ export default function App() {
     );
 
     // =======================================================
-    // USER PHOTO - RESOLUSI ASLI
+    // USER IMAGE
     // =======================================================
     const {
       x,
@@ -909,7 +920,7 @@ export default function App() {
     ctx.restore();
 
     // =======================================================
-    // FRAME FULL RESOLUTION
+    // FRAME
     // =======================================================
     ctx.save();
 
@@ -929,7 +940,7 @@ export default function App() {
   };
 
   // =========================================================
-  // PROCESS
+  // PROCESS TWIBBON
   // =========================================================
   const handleProcessTwibbon = () => {
     setIsProcessing(true);
@@ -1034,7 +1045,10 @@ export default function App() {
               error?.name !==
               'AbortError'
             ) {
-              console.error(error);
+              console.error(
+                'Gagal berbagi:',
+                error
+              );
             }
           }
         } else {
@@ -1062,17 +1076,21 @@ export default function App() {
   // RENDER
   // =========================================================
   return (
-    <div className="min-h-screen w-full overflow-x-hidden flex flex-col font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
 
-      {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
+      {/* =====================================================
+          NAVBAR
+          DIKEMBALIKAN SEPERTI VERSI AWAL
+          TIDAK STICKY
+      ====================================================== */}
+      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors">
 
-        <div className="w-full max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center space-x-2">
 
             <div className="p-2 bg-brand-600 rounded-xl text-white shadow-md">
-              <Frame className="w-5 h-5 sm:w-6 sm:h-6" />
+              <Frame className="w-6 h-6" />
             </div>
 
             <span className="text-xl font-black tracking-wider bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent">
@@ -1097,29 +1115,31 @@ export default function App() {
 
       </nav>
 
-      {/* MAIN */}
-      <main className="w-full max-w-2xl mx-auto px-4 sm:px-5 py-6 sm:py-8 flex-grow min-w-0">
+      {/* =====================================================
+          MAIN
+      ====================================================== */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
 
         {/* INTRO */}
-        <header className="text-center mb-8">
+        <header className="text-center mb-10">
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold mb-3 text-gray-900 dark:text-white leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 text-gray-900 dark:text-white">
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm sm:text-base">
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed text-sm sm:text-base">
             BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
 
         </header>
 
         {/* WORKFLOW */}
-        <section className="w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-4 sm:p-6 mb-8">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-5 sm:p-8 mb-12">
 
           {/* ALERT */}
           {alert.message && (
             <div
-              className={`mb-5 p-3.5 rounded-xl flex items-start gap-3 text-xs sm:text-sm font-medium ${
+              className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium transition-all ${
                 alert.type === 'error'
                   ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
                   : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
@@ -1139,15 +1159,17 @@ export default function App() {
             </div>
           )}
 
-          {/* UPLOAD FRAME */}
+          {/* =================================================
+              UPLOAD FRAME
+          ================================================== */}
           {!frameImg && (
             <div className="space-y-3">
 
-              <h2 className="text-base sm:text-lg font-bold">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
                 Langkah 1: Unggah Bingkai (PNG Transparan)
               </h2>
 
-              <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-5 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
+              <div className="relative aspect-square w-full max-w-sm mx-auto border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-brand-500 dark:hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
 
                 <input
                   type="file"
@@ -1173,11 +1195,12 @@ export default function App() {
             </div>
           )}
 
-          {/* FRAME + USER */}
+          {/* =================================================
+              FRAME + USER UPLOAD
+          ================================================== */}
           {frameImg && !userImg && (
             <div className="space-y-6">
 
-              {/* FRAME INFO */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-700">
 
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
@@ -1198,14 +1221,13 @@ export default function App() {
                       Dimensi Asli Bingkai:
                     </p>
 
-                    <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-100">
-                      {frameDimensions.width} ×{' '}
-                      {frameDimensions.height} px
+                    <p className="text-sm sm:text-base font-bold text-gray-800 dark:text-gray-100 truncate">
+                      {frameDimensions.width} × {frameDimensions.height} px
                     </p>
 
                   </div>
 
-                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors active:scale-95">
 
                     <RefreshCw className="w-3.5 h-3.5" />
 
@@ -1224,14 +1246,13 @@ export default function App() {
 
               </div>
 
-              {/* USER UPLOAD */}
               <div className="space-y-3">
 
-                <h2 className="text-base sm:text-lg font-bold">
+                <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
                   Langkah Kedua: Unggah Foto Kamu
                 </h2>
 
-                <div className="relative aspect-square w-full border-2 border-dashed border-brand-300 dark:border-brand-800 hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-5 text-center cursor-pointer bg-brand-50/20 dark:bg-slate-800/80 transition-all group">
+                <div className="relative aspect-square w-full max-w-sm mx-auto border-2 border-dashed border-brand-300 dark:border-brand-800 hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-brand-50/20 dark:bg-slate-800/80 transition-all group">
 
                   <input
                     type="file"
@@ -1259,135 +1280,143 @@ export default function App() {
             </div>
           )}
 
-          {/* EDITOR */}
+          {/* =================================================
+              CANVAS EDITOR
+          ================================================== */}
           {frameImg && userImg && (
-            <div className="space-y-5">
+            <div className="space-y-6">
 
-              <h2 className="text-base sm:text-lg font-bold">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
                 Sesuaikan Posisi Foto
               </h2>
 
-              {!isLocked && (
-                <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-
-                  <span className="flex items-center gap-1">
-                    <Move className="w-3.5 h-3.5" />
-                    Geser foto
-                  </span>
-
-                  <span className="flex items-center gap-1">
-                    <ZoomIn className="w-3.5 h-3.5" />
-                    Pinch/Wheel untuk Zoom
-                  </span>
-
-                </div>
-              )}
-
-              {/* CANVAS */}
-              <div
-                style={{
-                  touchAction: 'none',
-                  WebkitUserSelect: 'none',
-                  userSelect: 'none'
-                }}
-                className={`relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg bg-checkered border border-gray-200 dark:border-slate-700 ${
-                  isLocked
-                    ? 'cursor-not-allowed'
-                    : 'cursor-grab active:cursor-grabbing'
-                }`}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerCancel}
-                onWheel={handleWheel}
-              >
-
-                <canvas
-                  ref={canvasRef}
-                  className="w-full h-full block"
-                />
-
-              </div>
-
-              {/* ACTION */}
-              <div className="w-full flex flex-col gap-3">
+              <div className="flex flex-col items-center">
 
                 {!isLocked && (
-                  <button
-                    onClick={handleProcessTwibbon}
-                    disabled={isProcessing}
-                    className="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
-                  >
+                  <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
 
-                    {isProcessing ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Memproses...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" />
-                        <span>Buat Twibbon</span>
-                      </>
-                    )}
+                    <span className="flex items-center gap-1">
+                      <Move className="w-3.5 h-3.5" />
+                      Geser foto
+                    </span>
 
-                  </button>
-                )}
-
-                {isLocked && (
-                  <div className="space-y-3">
-
-                    <button
-                      onClick={handleDownload}
-                      className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                    >
-
-                      <Download className="w-5 h-5" />
-
-                      <span>Unduh Twibbon</span>
-
-                    </button>
-
-                    <div className="flex gap-3">
-
-                      <button
-                        onClick={handleShare}
-                        className="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
-                      >
-
-                        <Share2 className="w-4 h-4" />
-
-                        <span>Bagikan</span>
-
-                      </button>
-
-                      <button
-                        onClick={handleEditAgain}
-                        className="flex-1 py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
-                      >
-
-                        <RefreshCw className="w-4 h-4" />
-
-                        <span>Edit Lagi</span>
-
-                      </button>
-
-                    </div>
+                    <span className="flex items-center gap-1">
+                      <ZoomIn className="w-3.5 h-3.5" />
+                      Pinch/Wheel untuk Zoom
+                    </span>
 
                   </div>
                 )}
+
+                {/* CANVAS */}
+                <div
+                  className={`relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden shadow-lg bg-checkered border border-gray-200 dark:border-slate-700 touch-none ${
+                    isLocked
+                      ? 'cursor-not-allowed'
+                      : 'cursor-grab active:cursor-grabbing'
+                  }`}
+                  style={{
+                    touchAction: 'none',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none'
+                  }}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerCancel}
+                  onWheel={handleWheel}
+                >
+
+                  <canvas
+                    ref={canvasRef}
+                    className="w-full h-full object-contain block"
+                  />
+
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div className="mt-6 w-full max-w-md flex flex-col gap-3">
+
+                  {!isLocked && (
+                    <button
+                      onClick={handleProcessTwibbon}
+                      disabled={isProcessing}
+                      className="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
+                    >
+
+                      {isProcessing ? (
+                        <>
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          <span>Memproses...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          <span>Buat Twibbon</span>
+                        </>
+                      )}
+
+                    </button>
+                  )}
+
+                  {isLocked && (
+                    <div className="space-y-3 w-full">
+
+                      <button
+                        onClick={handleDownload}
+                        className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                      >
+
+                        <Download className="w-5 h-5" />
+
+                        <span>Unduh Twibbon</span>
+
+                      </button>
+
+                      <div className="flex gap-3">
+
+                        <button
+                          onClick={handleShare}
+                          className="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+
+                          <Share2 className="w-4 h-4" />
+
+                          <span>Bagikan</span>
+
+                        </button>
+
+                        <button
+                          onClick={handleEditAgain}
+                          className="py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+
+                          <RefreshCw className="w-4 h-4" />
+
+                          <span>Edit Lagi</span>
+
+                        </button>
+
+                      </div>
+
+                    </div>
+                  )}
+
+                </div>
 
               </div>
 
             </div>
           )}
 
-          {/* PRIVACY */}
-          <div className="mt-7 pt-6 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-4 rounded-xl">
+          {/* =================================================
+              PRIVACY
+          ================================================== */}
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-4 rounded-xl">
 
             <ShieldCheck className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
 
-            <p className="leading-relaxed">
+            <p>
               <strong>Jaminan Privasi:</strong>{' '}
               Foto & bingkai diproses sepenuhnya di browser kamu secara lokal, tidak pernah diunggah atau disimpan ke server mana pun. Privasi kamu 100% aman.
             </p>
@@ -1396,8 +1425,10 @@ export default function App() {
 
         </section>
 
-        {/* ARTICLE */}
-        <article className="w-full bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+        {/* =================================================
+            ARTICLE
+        ================================================== */}
+        <article className="prose dark:prose-invert max-w-none bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
 
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Mengapa Harus Menggunakan BINGKAI?
@@ -1407,7 +1438,7 @@ export default function App() {
             Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. <strong>BINGKAI</strong> hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
 
-          <ul className="list-disc pl-5 space-y-2 mb-0">
+          <ul className="list-disc pl-5 space-y-2 mb-4">
 
             <li>
               <strong>Tanpa Registrasi:</strong>{' '}
@@ -1426,7 +1457,7 @@ export default function App() {
 
             <li>
               <strong>100% Aman & Cepat:</strong>{' '}
-              Proses render menggunakan teknologi HTML5 Canvas langsung di perangkat Anda.
+              Proses render instant menggunakan teknologi HTML5 Canvas langsung di perangkat Anda.
             </li>
 
           </ul>
@@ -1435,10 +1466,12 @@ export default function App() {
 
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+      {/* =====================================================
+          FOOTER
+      ====================================================== */}
+      <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-gray-500 dark:text-gray-400 transition-colors">
 
-        <div className="w-full max-w-2xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
 
           <p>
             © {new Date().getFullYear()} BINGKAI. All rights reserved.
@@ -1450,4 +1483,4 @@ export default function App() {
 
     </div>
   );
-}   
+}
