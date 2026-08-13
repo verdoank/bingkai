@@ -2,19 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pola latar belakang catur untuk indikator area transparan */
+/* Custom Soft Checkered Background untuk Preview Transparansi */
 .bg-checkered {
-  background-image: linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
-                    linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
-                    linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
-  background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: #f8fafc;
+  background-image: 
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
 .dark .bg-checkered {
-  background-image: linear-gradient(45deg, #374151 25%, transparent 25%),
-                    linear-gradient(-45deg, #374151 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #374151 75%),
-                    linear-gradient(-45deg, transparent 75%, #374151 75%);
+  background-color: #0f172a;
+  background-image: 
+    linear-gradient(45deg, #1e293b 25%, transparent 25%), 
+    linear-gradient(-45deg, #1e293b 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #1e293b 75%), 
+    linear-gradient(-45deg, transparent 75%, #1e293b 75%);
 }
