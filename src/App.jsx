@@ -66,18 +66,14 @@ export default function App() {
   const frameImgRef = useRef(null);
   const userImgRef = useRef(null);
 
-  // Transform disimpan di ref supaya gesture tidak menyebabkan
-  // React render pada setiap gerakan jari.
   const transformRef = useRef({
     x: 0,
     y: 0,
     scale: 1
   });
 
-  // Pointer aktif untuk mouse / touch / stylus.
   const pointersRef = useRef(new Map());
 
-  // Data gesture.
   const gestureRef = useRef({
     mode: 'none',
 
@@ -91,11 +87,10 @@ export default function App() {
     startScale: 1
   });
 
-  // RequestAnimationFrame.
   const rafRef = useRef(null);
 
-  // Preview dibatasi supaya gesture ringan pada HP.
-  // Hasil download tetap resolusi asli.
+  // Preview dibatasi agar ringan saat geser / pinch.
+  // File hasil download tetap memakai resolusi asli.
   const PREVIEW_MAX_SIZE = 1200;
 
   // =========================================================
@@ -182,7 +177,6 @@ export default function App() {
 
       const totalPixels = data.length / 4;
 
-      // Sampling agar PNG besar tidak membuat HP berat.
       const step = Math.max(
         1,
         Math.floor(totalPixels / 100000)
@@ -442,8 +436,7 @@ export default function App() {
     // =======================================================
     ctx.save();
 
-    // Hanya transparan ketika benar-benar sedang disentuh.
-    // Setelah pointer dilepas, isInteracting = false.
+    // Transparansi HANYA saat sedang disentuh.
     ctx.globalAlpha =
       isInteracting && !isLocked
         ? 0.65
@@ -480,7 +473,7 @@ export default function App() {
   }, [drawPreview]);
 
   // =========================================================
-  // INITIAL DRAW
+  // DRAW EFFECT
   // =========================================================
   useEffect(() => {
     frameImgRef.current = frameImg;
@@ -501,7 +494,7 @@ export default function App() {
   ]);
 
   // =========================================================
-  // RAF CLEANUP
+  // CLEANUP RAF
   // =========================================================
   useEffect(() => {
     return () => {
@@ -514,7 +507,7 @@ export default function App() {
   }, []);
 
   // =========================================================
-  // DISTANCE
+  // DISTANCE 2 FINGER
   // =========================================================
   const getDistance = (a, b) => {
     return Math.hypot(
@@ -580,7 +573,7 @@ export default function App() {
     setIsInteracting(true);
 
     // =======================================================
-    // TWO FINGER
+    // TWO FINGER PINCH
     // =======================================================
     if (pointers.length === 2) {
       gestureRef.current.mode =
@@ -599,7 +592,7 @@ export default function App() {
     }
 
     // =======================================================
-    // SINGLE POINTER
+    // SINGLE FINGER PAN
     // =======================================================
     gestureRef.current.mode =
       'pan';
@@ -644,7 +637,7 @@ export default function App() {
     );
 
     // =======================================================
-    // TWO FINGER PINCH
+    // PINCH 2 JARI
     // =======================================================
     if (pointers.length >= 2) {
       const distance = getDistance(
@@ -678,7 +671,7 @@ export default function App() {
     }
 
     // =======================================================
-    // SINGLE FINGER PAN
+    // DRAG 1 JARI
     // =======================================================
     if (
       gestureRef.current.mode !==
@@ -727,9 +720,7 @@ export default function App() {
       pointersRef.current.values()
     );
 
-    // =======================================================
-    // SEMUA POINTER LEPAS
-    // =======================================================
+    // Semua jari dilepas.
     if (pointers.length === 0) {
       gestureRef.current.mode =
         'none';
@@ -743,15 +734,13 @@ export default function App() {
         y: transformRef.current.y
       });
 
-      // Kembali normal.
+      // Bingkai kembali normal setelah dilepas.
       setIsInteracting(false);
 
       return;
     }
 
-    // =======================================================
-    // 2 JARI -> 1 JARI
-    // =======================================================
+    // Dari 2 jari menjadi 1 jari.
     if (pointers.length === 1) {
       const pointer = pointers[0];
 
@@ -871,9 +860,6 @@ export default function App() {
       height
     );
 
-    // =======================================================
-    // USER IMAGE
-    // =======================================================
     const {
       x,
       y,
@@ -919,11 +905,8 @@ export default function App() {
 
     ctx.restore();
 
-    // =======================================================
-    // FRAME
-    // =======================================================
+    // Bingkai selalu 100% normal pada hasil akhir.
     ctx.save();
-
     ctx.globalAlpha = 1;
 
     ctx.drawImage(
@@ -940,7 +923,7 @@ export default function App() {
   };
 
   // =========================================================
-  // PROCESS TWIBBON
+  // PROCESS
   // =========================================================
   const handleProcessTwibbon = () => {
     setIsProcessing(true);
@@ -1064,7 +1047,7 @@ export default function App() {
   };
 
   // =========================================================
-  // EDIT LAGI
+  // EDIT AGAIN
   // =========================================================
   const handleEditAgain = () => {
     setIsLocked(false);
@@ -1073,19 +1056,18 @@ export default function App() {
   };
 
   // =========================================================
-  // RENDER
+  // UI
   // =========================================================
   return (
     <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
 
       {/* =====================================================
           NAVBAR
-          DIKEMBALIKAN SEPERTI VERSI AWAL
-          TIDAK STICKY
+          STICKY + BLUR
       ====================================================== */}
-      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200/70 dark:border-slate-800/70 transition-colors duration-200">
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="w-full max-w-[600px] mx-auto px-4 h-16 flex items-center justify-between">
 
           <div className="flex items-center space-x-2">
 
@@ -1117,8 +1099,9 @@ export default function App() {
 
       {/* =====================================================
           MAIN
+          DESKTOP DIBUAT SEPERTI LEBAR MOBILE
       ====================================================== */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+      <main className="w-full max-w-[600px] mx-auto px-4 py-8 flex-grow">
 
         {/* INTRO */}
         <header className="text-center mb-10">
@@ -1133,8 +1116,10 @@ export default function App() {
 
         </header>
 
-        {/* WORKFLOW */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-5 sm:p-8 mb-12">
+        {/* =================================================
+            WORKFLOW
+        ================================================== */}
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-5 sm:p-6 mb-12">
 
           {/* ALERT */}
           {alert.message && (
@@ -1160,7 +1145,7 @@ export default function App() {
           )}
 
           {/* =================================================
-              UPLOAD FRAME
+              STEP 1
           ================================================== */}
           {!frameImg && (
             <div className="space-y-3">
@@ -1196,7 +1181,7 @@ export default function App() {
           )}
 
           {/* =================================================
-              FRAME + USER UPLOAD
+              FRAME + USER IMAGE
           ================================================== */}
           {frameImg && !userImg && (
             <div className="space-y-6">
@@ -1334,7 +1319,7 @@ export default function App() {
 
                 </div>
 
-                {/* ACTION BUTTONS */}
+                {/* BUTTONS */}
                 <div className="mt-6 w-full max-w-md flex flex-col gap-3">
 
                   {!isLocked && (
@@ -1428,7 +1413,7 @@ export default function App() {
         {/* =================================================
             ARTICLE
         ================================================== */}
-        <article className="prose dark:prose-invert max-w-none bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+        <article className="prose dark:prose-invert max-w-none bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
 
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Mengapa Harus Menggunakan BINGKAI?
@@ -1471,7 +1456,7 @@ export default function App() {
       ====================================================== */}
       <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-gray-500 dark:text-gray-400 transition-colors">
 
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="w-full max-w-[600px] mx-auto px-4">
 
           <p>
             © {new Date().getFullYear()} BINGKAI. All rights reserved.
