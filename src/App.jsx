@@ -224,9 +224,9 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
       
-      {/* NAVBAR */}
+      {/* NAVBAR (DIKUNCI KE max-w-[600px]) */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
-        <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 bg-blue-600 rounded-lg text-white shadow-sm">
               <Frame className="w-5 h-5" />
@@ -244,54 +244,54 @@ export default function App() {
         </div>
       </nav>
 
-      {/* MAIN CONTAINER (DIKUNCI KE UKURAN MOBILE max-w-md TERPUSAT) */}
-      <main className="max-w-md mx-auto px-4 py-6 flex-grow w-full">
+      {/* MAIN CONTAINER (DIKUNCI KE LEBAR 600px / max-w-[600px] TERPUSAT) */}
+      <main className="max-w-[600px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
         
         {/* HEADER */}
         <header className="text-center mb-6">
-          <h1 className="text-xl sm:text-2xl font-extrabold mb-2 text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 text-gray-900 dark:text-white tracking-tight">
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
             BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
         </header>
 
         {/* WORKFLOW CARD */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-4 sm:p-5 mb-6 w-full">
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-5 sm:p-6 mb-6 w-full">
           
           {/* ALERT */}
           {alert.message && (
-            <div className={`mb-4 p-3 rounded-xl flex items-center gap-2.5 text-xs font-medium w-full ${
+            <div className={`mb-5 p-3.5 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-medium w-full ${
               alert.type === 'error' 
                 ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900' 
                 : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
             }`}>
-              {alert.type === 'error' ? <AlertCircle className="w-4 h-4 flex-shrink-0" /> : <CheckCircle2 className="w-4 h-4 flex-shrink-0" />}
+              {alert.type === 'error' ? <AlertCircle className="w-5 h-5 flex-shrink-0" /> : <CheckCircle2 className="w-5 h-5 flex-shrink-0" />}
               <span className="text-left leading-snug">{alert.message}</span>
             </div>
           )}
 
-          {/* LANGKAH 1 */}
+          {/* LANGKAH 1: UPLOAD BINGKAI */}
           {!frameImg && (
             <div className="space-y-3 w-full">
-              <h2 className="text-sm font-bold text-gray-900 dark:text-white text-left">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
                 Langkah Pertama: Unggah Bingkai
               </h2>
-              <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all">
+              <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
                 <input 
                   type="file" 
                   accept="image/png" 
                   onChange={handleFrameUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-                <div className="p-3 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-2">
-                  <Upload className="w-6 h-6" />
+                <div className="p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-105 transition-transform">
+                  <Upload className="w-7 h-7" />
                 </div>
-                <p className="font-semibold text-xs text-gray-700 dark:text-gray-200 mb-1">
+                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
                   Unggah File Bingkai PNG Transparan
                 </p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   Pastikan bingkai memiliki bidang transparan
                 </p>
               </div>
@@ -300,23 +300,23 @@ export default function App() {
 
           {/* PREVIEW BINGKAI & LANGKAH 2 */}
           {frameImg && (
-            <div className="space-y-4 w-full">
+            <div className="space-y-5 w-full">
               
               {/* KARTU PREVIEW BINGKAI */}
-              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-700/40 rounded-xl border border-gray-200 dark:border-slate-700/80 w-full">
-                <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
+              <div className="flex items-center gap-4 p-3.5 bg-gray-50 dark:bg-slate-700/40 rounded-xl border border-gray-200 dark:border-slate-700/80 w-full">
+                <div className="w-14 h-14 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
                   <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain" />
                 </div>
 
                 <div className="flex-1 flex flex-col items-start text-left min-w-0">
-                  <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                  <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
                     Dimensi Asli Bingkai:
                   </p>
-                  <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {frameDimensions.width} × {frameDimensions.height} px
                   </p>
-                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 text-[10px] font-semibold transition-colors">
-                    <RefreshCw className="w-3 h-3" />
+                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 text-xs font-semibold transition-colors">
+                    <RefreshCw className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                   </label>
@@ -326,23 +326,23 @@ export default function App() {
               {/* LANGKAH 2: UPLOAD FOTO */}
               {!userImg && (
                 <div className="space-y-3 w-full">
-                  <h2 className="text-sm font-bold text-gray-900 dark:text-white text-left">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
                     Langkah Kedua: Unggah Foto Kamu
                   </h2>
-                  <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-xl flex flex-col items-center justify-center p-4 text-center cursor-pointer bg-gray-50/30 dark:bg-slate-800/50 transition-all">
+                  <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/30 dark:bg-slate-800/50 transition-all group">
                     <input 
                       type="file" 
                       accept="image/*" 
                       onChange={handleUserImgUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <div className="p-3 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-2">
-                      <ImageIcon className="w-6 h-6" />
+                    <div className="p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-105 transition-transform">
+                      <ImageIcon className="w-7 h-7" />
                     </div>
-                    <p className="font-semibold text-xs text-gray-700 dark:text-gray-200 mb-0.5">
+                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
                       Unggah Foto Yang Ingin Dipasang
                     </p>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Mendukung JPG, PNG, WEBP
                     </p>
                   </div>
@@ -352,20 +352,20 @@ export default function App() {
               {/* EDITOR CANVAS */}
               {userImg && (
                 <div className="space-y-4 w-full">
-                  <h2 className="text-sm font-bold text-gray-900 dark:text-white text-left">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
                     Sesuaikan Posisi Foto
                   </h2>
 
                   <div className="flex flex-col items-center w-full">
                     {!isLocked && (
-                      <div className="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 mb-2">
-                        <span className="flex items-center gap-1"><Move className="w-3 h-3" /> Geser foto</span>
-                        <span className="flex items-center gap-1"><ZoomIn className="w-3 h-3" /> Zoom</span>
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-2.5">
+                        <span className="flex items-center gap-1.5"><Move className="w-3.5 h-3.5" /> Geser foto</span>
+                        <span className="flex items-center gap-1.5"><ZoomIn className="w-3.5 h-3.5" /> Zoom</span>
                       </div>
                     )}
 
                     <div 
-                      className={`relative aspect-square w-full rounded-xl overflow-hidden shadow-md bg-checkered border border-gray-200 dark:border-slate-700 touch-none ${
+                      className={`relative aspect-square w-full rounded-2xl overflow-hidden shadow-md bg-checkered border border-gray-200 dark:border-slate-700 touch-none ${
                         isLocked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
                       }`}
                       onMouseDown={handlePointerDown}
@@ -380,12 +380,12 @@ export default function App() {
                       <canvas ref={canvasRef} className="w-full h-full object-contain block" />
                     </div>
 
-                    <div className="mt-4 w-full flex flex-col gap-2">
+                    <div className="mt-5 w-full flex flex-col gap-2.5">
                       {!isLocked && (
                         <button
                           onClick={handleProcessTwibbon}
                           disabled={isProcessing}
-                          className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                          className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                         >
                           {isProcessing ? (
                             <>
@@ -402,29 +402,29 @@ export default function App() {
                       )}
 
                       {isLocked && (
-                        <div className="space-y-2 w-full">
+                        <div className="space-y-2.5 w-full">
                           <button
                             onClick={handleDownload}
-                            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                           >
                             <Download className="w-4 h-4" />
                             <span>Unduh Twibbon</span>
                           </button>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2.5">
                             <button
                               onClick={handleShare}
-                              className="flex-1 py-2.5 px-3 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-semibold text-xs transition-all flex items-center justify-center gap-1.5"
+                              className="flex-1 py-3 px-3 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
                             >
-                              <Share2 className="w-3.5 h-3.5" />
+                              <Share2 className="w-4 h-4" />
                               <span>Bagikan</span>
                             </button>
 
                             <button
                               onClick={() => setIsLocked(false)}
-                              className="py-2.5 px-3 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 font-semibold text-xs transition-all flex items-center justify-center gap-1.5"
+                              className="py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
                             >
-                              <RefreshCw className="w-3.5 h-3.5" />
+                              <RefreshCw className="w-4 h-4" />
                               <span>Edit Lagi</span>
                             </button>
                           </div>
@@ -439,9 +439,9 @@ export default function App() {
           )}
 
           {/* CATATAN PRIVASI */}
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-2.5 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-3 rounded-xl text-left w-full">
+          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-3 text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-3.5 rounded-xl text-left w-full">
             <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-            <p className="leading-tight">
+            <p className="leading-relaxed">
               <strong>Jaminan Privasi:</strong> Foto & bingkai diproses sepenuhnya di browser kamu secara lokal, tidak pernah diunggah atau disimpan ke server mana pun. Privasi kamu 100% aman.
             </p>
           </div>
@@ -449,14 +449,14 @@ export default function App() {
         </section>
 
         {/* ARTIKEL SEO / INFORMASI */}
-        <article className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2">
+        <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
+          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
             Mengapa Harus Menggunakan BINGKAI?
           </h2>
           <p className="mb-3">
             Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
-          <ul className="list-disc pl-4 space-y-1.5">
+          <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
             <li><strong>Presisi Tinggi:</strong> Dilengkapi fitur geser dan zoom intuitif untuk menyesuaikan posisi foto secara sempurna.</li>
             <li><strong>Kualitas Asli Terjaga:</strong> Mempertahankan resolusi bingkai asli tanpa kompresi berlebih.</li>
@@ -467,8 +467,8 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 text-center text-[11px] text-gray-500 dark:text-gray-400">
-        <div className="max-w-md mx-auto px-4">
+      <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
+        <div className="max-w-[600px] mx-auto px-4">
           <p>© {new Date().getFullYear()} BINGKAI. All rights reserved.</p>
         </div>
       </footer>
