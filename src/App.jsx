@@ -1,4 +1,4 @@
-            import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sun, Moon, Frame, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
@@ -32,7 +32,7 @@ export default function App() {
   const posStartRef = useRef({ x: 0, y: 0 });
   const scaleStartRef = useRef(1);
 
-  // Toggle Mode Gelap / Terang
+  // Toggle Mode Gelap / Terang Anti-Flicker
   const toggleTheme = () => {
     if (darkMode) {
       document.documentElement.classList.remove('dark');
@@ -259,11 +259,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between font-sans">
+    <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
       
-      {/* 1. NAVBAR */}
+      {/* 1. NAVBAR SIMPLE */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-brand-600 rounded-xl text-white shadow-md">
               <Frame className="w-6 h-6" />
@@ -283,9 +283,9 @@ export default function App() {
       </nav>
 
       {/* MAIN CONTAINER */}
-      <main className="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
         
-        {/* 2. ARTIKEL SINGKAT INTRO */}
+        {/* 2. ARTIKEL SINGKAT INTRO SETELAH NAVBAR */}
         <header className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 text-gray-900 dark:text-white">
             Solusi Pasang Twibbon Instan Tanpa Ribet
@@ -295,10 +295,10 @@ export default function App() {
           </p>
         </header>
 
-        {/* 3. ALUR WORKFLOW & CONTENT */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-6 sm:p-8 mb-12">
+        {/* 3. ALUR WORKFLOW & CONTENT CONTAINER */}
+        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-5 sm:p-8 mb-12">
           
-          {/* ALERT SYSTEM */}
+          {/* A. ALERT SYSTEM VERIFIKASI BINGKAI */}
           {alert.message && (
             <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium transition-all ${
               alert.type === 'error' 
@@ -310,13 +310,13 @@ export default function App() {
             </div>
           )}
 
-          {/* A. DROP AREA BINGKAI (Jika belum ada bingkai yang diupload) */}
+          {/* A. DROP AREA BINGKAI (Tampil saat belum ada bingkai) */}
           {!frameImg && (
-            <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-                Langkah 1: Unggah Bingkai (Twibbon PNG Transparan)
-              </label>
-              <div className="relative aspect-square w-full max-w-md mx-auto border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-brand-500 dark:hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
+            <div className="space-y-3">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
+                Langkah 1: Unggah Bingkai (PNG Transparan)
+              </h2>
+              <div className="relative aspect-square w-full max-w-sm mx-auto border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-brand-500 dark:hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
                 <input 
                   type="file" 
                   accept="image/png" 
@@ -336,19 +336,18 @@ export default function App() {
             </div>
           )}
 
-          {/* B & C. PREVIEW BINGKAI & UPLOAD FOTO (Bagian ini yang disempurnakan) */}
+          {/* B & C. PREVIEW BINGKAI & UPLOAD FOTO PENGGUNA */}
           {frameImg && !userImg && (
             <div className="space-y-6">
               
-              {/* Preview Bingkai di Atas */}
+              {/* Point B: Preview Bingkai + Resolusi + Tombol Ganti */}
               <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-700">
-                
-                {/* 1. SEBELAH KIRI: Gambar Preview Thumbnail (Fixed Size) */}
+                {/* Preview Thumbnail Kiri */}
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-checkered flex-shrink-0">
                   <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain" />
                 </div>
 
-                {/* 2. SEBELAH KANAN: Teks Ukuran (Atas) & Tombol Ganti (Bawah) */}
+                {/* Sebelah Kanan: Dimensi (Atas) & Tombol Ganti Bingkai Kecil (Bawah) */}
                 <div className="flex flex-col items-start gap-2 min-w-0">
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Dimensi Asli Bingkai:</p>
@@ -357,22 +356,20 @@ export default function App() {
                     </p>
                   </div>
 
-                  {/* Tombol diletakkan persis di bawah teks */}
                   <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors active:scale-95">
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                   </label>
                 </div>
-
               </div>
 
-              {/* Langkah Kedua: Drop Area Upload Foto */}
-              <div>
-                <p className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300 text-center">
+              {/* Point C: Langkah Kedua Upload Foto Pengguna */}
+              <div className="space-y-3">
+                <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
                   Langkah Kedua: Unggah Foto Kamu
-                </p>
-                <div className="relative aspect-square w-full max-w-md mx-auto border-2 border-dashed border-brand-300 dark:border-brand-800 hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-brand-50/20 dark:bg-slate-800/80 transition-all group">
+                </h2>
+                <div className="relative aspect-square w-full max-w-sm mx-auto border-2 border-dashed border-brand-300 dark:border-brand-800 hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-brand-50/20 dark:bg-slate-800/80 transition-all group">
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -390,99 +387,106 @@ export default function App() {
                   </p>
                 </div>
               </div>
+
             </div>
           )}
 
-          {/* D, E, F. EDITOR CANVAS TWIBBON (Tampil jika Bingkai & Foto sudah ada) */}
+          {/* D, E, F. CANVAS EDITOR & KONTROL */}
           {frameImg && userImg && (
-            <div className="flex flex-col items-center">
-              
-              {/* Petunjuk Penggunaan Canvas */}
-              {!isLocked && (
-                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                  <span className="flex items-center gap-1"><Move className="w-3.5 h-3.5" /> Geser foto</span>
-                  <span className="flex items-center gap-1"><ZoomIn className="w-3.5 h-3.5" /> Pinch/Wheel untuk Zoom</span>
-                </div>
-              )}
+            <div className="space-y-6">
+              <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100 text-left">
+                Sesuaikan Posisi Foto
+              </h2>
 
-              {/* Canvas Area */}
-              <div 
-                className={`relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden shadow-lg bg-checkered border border-gray-200 dark:border-slate-700 touch-none ${
-                  isLocked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
-                }`}
-                onMouseDown={handlePointerDown}
-                onMouseMove={handlePointerMove}
-                onMouseUp={handlePointerEnd}
-                onMouseLeave={handlePointerEnd}
-                onTouchStart={handlePointerDown}
-                onTouchMove={handlePointerMove}
-                onTouchEnd={handlePointerEnd}
-                onWheel={handleWheel}
-              >
-                <canvas ref={canvasRef} className="w-full h-full object-contain block" />
-              </div>
-
-              {/* Tombol aksi setelah disatukan */}
-              <div className="mt-6 w-full max-w-md flex flex-col gap-3">
+              <div className="flex flex-col items-center">
                 
-                {/* Tombol Buat Twibbon */}
+                {/* Petunjuk Gesture */}
                 {!isLocked && (
-                  <button
-                    onClick={handleProcessTwibbon}
-                    disabled={isProcessing}
-                    className="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 animate-spin" />
-                        <span>Memproses...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-5 h-5" />
-                        <span>Buat Twibbon</span>
-                      </>
-                    )}
-                  </button>
-                )}
-
-                {/* Tombol Unduh & Bagikan (Tampil setelah klik Buat Twibbon) */}
-                {isLocked && (
-                  <div className="space-y-3 w-full">
-                    <button
-                      onClick={handleDownload}
-                      className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                    >
-                      <Download className="w-5 h-5" />
-                      <span>Unduh Twibbon</span>
-                    </button>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleShare}
-                        className="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Share2 className="w-4 h-4" />
-                        <span>Bagikan</span>
-                      </button>
-
-                      <button
-                        onClick={() => setIsLocked(false)}
-                        className="py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Edit Lagi</span>
-                      </button>
-                    </div>
+                  <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    <span className="flex items-center gap-1"><Move className="w-3.5 h-3.5" /> Geser foto</span>
+                    <span className="flex items-center gap-1"><ZoomIn className="w-3.5 h-3.5" /> Pinch/Wheel untuk Zoom</span>
                   </div>
                 )}
 
+                {/* Canvas Gambar + Transparansi otomatis saat diinteraksi */}
+                <div 
+                  className={`relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden shadow-lg bg-checkered border border-gray-200 dark:border-slate-700 touch-none ${
+                    isLocked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
+                  }`}
+                  onMouseDown={handlePointerDown}
+                  onMouseMove={handlePointerMove}
+                  onMouseUp={handlePointerEnd}
+                  onMouseLeave={handlePointerEnd}
+                  onTouchStart={handlePointerDown}
+                  onTouchMove={handlePointerMove}
+                  onTouchEnd={handlePointerEnd}
+                  onWheel={handleWheel}
+                >
+                  <canvas ref={canvasRef} className="w-full h-full object-contain block" />
+                </div>
+
+                {/* Tombol Aksi */}
+                <div className="mt-6 w-full max-w-md flex flex-col gap-3">
+                  
+                  {/* Point E: Tombol Buat Twibbon dengan animasi Memproses... */}
+                  {!isLocked && (
+                    <button
+                      onClick={handleProcessTwibbon}
+                      disabled={isProcessing}
+                      className="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-75"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          <span>Memproses...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          <span>Buat Twibbon</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Point F: Tombol Unduh & Bagikan + Edit Lagi (Canvas Terkunci) */}
+                  {isLocked && (
+                    <div className="space-y-3 w-full">
+                      <button
+                        onClick={handleDownload}
+                        className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-5 h-5" />
+                        <span>Unduh Twibbon</span>
+                      </button>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handleShare}
+                          className="flex-1 py-3 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          <span>Bagikan</span>
+                        </button>
+
+                        <button
+                          onClick={() => setIsLocked(false)}
+                          className="py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center gap-2 text-sm"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          <span>Edit Lagi</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
               </div>
             </div>
           )}
 
-          {/* G. CATATAN PRIVASI (Point A - G) */}
-          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-3 text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-3.5 rounded-xl">
+          {/* G. CATATAN PRIVASI (A - G) */}
+          <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700/60 flex items-start gap-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-slate-800/30 p-4 rounded-xl">
             <ShieldCheck className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
             <p>
               <strong>Jaminan Privasi:</strong> Foto & bingkai diproses sepenuhnya di browser kamu secara lokal, tidak pernah diunggah atau disimpan ke server mana pun. Privasi kamu 100% aman.
@@ -491,7 +495,7 @@ export default function App() {
 
         </section>
 
-        {/* H. ARTIKEL AJAKAN (SEO & Informatif) */}
+        {/* H. ARTIKEL LENGKAP AJAKAN */}
         <article className="prose dark:prose-invert max-w-none bg-white dark:bg-slate-800 rounded-2xl p-6 sm:p-8 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Mengapa Harus Menggunakan BINGKAI?
@@ -509,13 +513,13 @@ export default function App() {
 
       </main>
 
-      {/* I. FOOTER (Tahun Otomatis Update) */}
+      {/* I. FOOTER (Tahun Otomatis) */}
       <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-gray-500 dark:text-gray-400 transition-colors">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           <p>© {new Date().getFullYear()} BINGKAI. All rights reserved.</p>
         </div>
       </footer>
 
     </div>
   );
-}   
+}
