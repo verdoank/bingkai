@@ -224,7 +224,7 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
       
-      {/* NAVBAR (DIKUNCI KE max-w-[600px]) */}
+      {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -244,7 +244,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* MAIN CONTAINER (DIKUNCI KE LEBAR 600px / max-w-[600px] TERPUSAT) */}
+      {/* MAIN CONTAINER (600px TERPUSAT) */}
       <main className="max-w-[600px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-grow w-full">
         
         {/* HEADER */}
@@ -260,14 +260,14 @@ export default function App() {
         {/* WORKFLOW CARD */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-5 sm:p-6 mb-6 w-full">
           
-          {/* ALERT */}
+          {/* ALERT DANGER / SUCCESS TERPISAH DENGAN BENAR */}
           {alert.message && (
             <div className={`mb-5 p-3.5 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-medium w-full ${
               alert.type === 'error' 
-                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900' 
-                : 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
+                ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80' 
+                : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80'
             }`}>
-              {alert.type === 'error' ? <AlertCircle className="w-5 h-5 flex-shrink-0" /> : <CheckCircle2 className="w-5 h-5 flex-shrink-0" />}
+              {alert.type === 'error' ? <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600 dark:text-rose-400" /> : <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />}
               <span className="text-left leading-snug">{alert.message}</span>
             </div>
           )}
@@ -315,7 +315,7 @@ export default function App() {
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {frameDimensions.width} × {frameDimensions.height} px
                   </p>
-                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 text-xs font-semibold transition-colors">
+                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors">
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
