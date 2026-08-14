@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sun, Moon, Frame, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
-  Sparkles, Image as ImageIcon, ZoomIn, Move
+  Sparkles, Image as ImageIcon, ZoomIn, Move, Loader2
 } from 'lucide-react';
 
 export default function App() {
@@ -11,6 +11,10 @@ export default function App() {
   const [frameDimensions, setFrameDimensions] = useState({ width: 0, height: 0 });
   const [userImg, setUserImg] = useState(null);
   const [alert, setAlert] = useState({ type: '', message: '' });
+
+  // State loading terpisah untuk feedback upload
+  const [isUploadingFrame, setIsUploadingFrame] = useState(false);
+  const [isUploadingUserImg, setIsUploadingUserImg] = useState(false);
 
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -35,7 +39,7 @@ export default function App() {
     }
   };
 
-  // 1. Alert pada Upload Bingkai
+  // 1. Upload Bingkai dengan Efek Loading
   const handleFrameUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -45,43 +49,49 @@ export default function App() {
       return;
     }
 
+    setIsUploadingFrame(true);
+
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.src = url;
 
     img.onload = () => {
-      const tempCanvas = document.createElement('canvas');
-      const ctx = tempCanvas.getContext('2d');
-      tempCanvas.width = img.width;
-      tempCanvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+      setTimeout(() => {
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d');
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-      const imageData = ctx.getImageData(0, 0, img.width, img.height);
-      const data = imageData.data;
-      let hasAlpha = false;
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const data = imageData.data;
+        let hasAlpha = false;
 
-      for (let i = 3; i < data.length; i += 16) {
-        if (data[i] < 255) {
-          hasAlpha = true;
-          break;
+        for (let i = 3; i < data.length; i += 16) {
+          if (data[i] < 255) {
+            hasAlpha = true;
+            break;
+          }
         }
-      }
 
-      if (!hasAlpha) {
-        setAlert({ 
-          type: 'error', 
-          message: 'Bingkai transparan tidak valid! Pastikan memakai file PNG transparan.' 
-        });
-        URL.revokeObjectURL(url);
-      } else {
-        setFrameImg(img);
-        setFrameDimensions({ width: img.width, height: img.height });
-        setAlert({ type: 'success', message: 'Bingkai transparan berhasil diunggah! Silakan lanjut ke langkah kedua.' });
-      }
+        setIsUploadingFrame(false);
+
+        if (!hasAlpha) {
+          setAlert({ 
+            type: 'error', 
+            message: 'Bingkai transparan tidak valid! Pastikan memakai file PNG transparan.' 
+          });
+          URL.revokeObjectURL(url);
+        } else {
+          setFrameImg(img);
+          setFrameDimensions({ width: img.width, height: img.height });
+          setAlert({ type: 'success', message: 'Bingkai transparan berhasil diunggah! Silakan lanjut ke langkah kedua.' });
+        }
+      }, 600); // Penundaan halus untuk feedback visual animasi
     };
   };
 
-  // 2. Alert pada Upload Foto Pengguna
+  // 2. Upload Foto Pengguna dengan Efek Loading
   const handleUserImgUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -91,15 +101,21 @@ export default function App() {
       return;
     }
 
+    setIsUploadingUserImg(true);
+
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.src = url;
+
     img.onload = () => {
-      setUserImg(img);
-      setScale(1);
-      setPosition({ x: 0, y: 0 });
-      setIsLocked(false);
-      setAlert({ type: 'success', message: 'Foto berhasil diunggah! Atur posisi & zoom sesuai selera lalu klik "Buat Twibbon".' });
+      setTimeout(() => {
+        setUserImg(img);
+        setScale(1);
+        setPosition({ x: 0, y: 0 });
+        setIsLocked(false);
+        setIsUploadingUserImg(false);
+        setAlert({ type: 'success', message: 'Foto berhasil diunggah! Atur posisi & zoom sesuai selera lalu klik "Buat Twibbon".' });
+      }, 600);
     };
   };
 
@@ -193,7 +209,6 @@ export default function App() {
     setScale((prev) => Math.min(Math.max(prev * (e.deltaY < 0 ? 1.08 : 0.92), 0.2), 5));
   };
 
-  // 3. Alert pada Tombol Buat Twibbon
   const handleProcessTwibbon = () => {
     if (!userImg) {
       setAlert({ type: 'error', message: 'Harap unggah foto Anda terlebih dahulu sebelum memproses!' });
@@ -207,7 +222,6 @@ export default function App() {
     }, 1000);
   };
 
-  // 4. Alert pada Tombol Unduh
   const handleDownload = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
@@ -217,7 +231,6 @@ export default function App() {
     setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
   };
 
-  // 5. Alert pada Tombol Bagikan
   const handleShare = async () => {
     if (!canvasRef.current) return;
     canvasRef.current.toBlob(async (blob) => {
@@ -241,7 +254,6 @@ export default function App() {
     });
   };
 
-  // 6. Alert pada Tombol Edit Lagi
   const handleReEdit = () => {
     setIsLocked(false);
     setAlert({ type: 'success', message: 'Mode edit diaktifkan. Silakan sesuaikan kembali posisi atau skala foto kamu.' });
@@ -290,7 +302,7 @@ export default function App() {
         {/* WORKFLOW CARD */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-4 sm:p-6 mb-6 w-full">
           
-          {/* DINAMIS ALERT SYSTEM */}
+          {/* ALERT SYSTEM */}
           {alert.message && (
             <div className={`mb-5 p-3.5 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-medium w-full ${
               alert.type === 'error' 
@@ -317,16 +329,25 @@ export default function App() {
                   type="file" 
                   accept="image/png" 
                   onChange={handleFrameUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={isUploadingFrame}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
                 />
-                <div className="p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-105 transition-transform">
-                  <Upload className="w-7 h-7" />
+                
+                {/* ICON DENGAN SPINNER BORDER FEEDBACK */}
+                <div className="relative mb-3">
+                  <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 transition-transform ${isUploadingFrame ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    <Upload className={`w-7 h-7 ${isUploadingFrame ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''}`} />
+                  </div>
+                  {isUploadingFrame && (
+                    <div className="absolute -inset-1 rounded-full border-2 border-transparent border-t-blue-600 border-r-blue-600 animate-spin" />
+                  )}
                 </div>
+
                 <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
-                  Unggah File Bingkai PNG Transparan
+                  {isUploadingFrame ? 'Memeriksa Transparansi Bingkai...' : 'Unggah File Bingkai PNG Transparan'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Pastikan bingkai memiliki bidang transparan
+                  {isUploadingFrame ? 'Mohon tunggu sebentar' : 'Pastikan bingkai memiliki bidang transparan'}
                 </p>
               </div>
             </div>
@@ -368,16 +389,25 @@ export default function App() {
                       type="file" 
                       accept="image/*" 
                       onChange={handleUserImgUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      disabled={isUploadingUserImg}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
                     />
-                    <div className="p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-105 transition-transform">
-                      <ImageIcon className="w-7 h-7" />
+
+                    {/* ICON DENGAN SPINNER BORDER FEEDBACK */}
+                    <div className="relative mb-3">
+                      <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 transition-transform ${isUploadingUserImg ? 'scale-110' : 'group-hover:scale-105'}`}>
+                        <ImageIcon className={`w-7 h-7 ${isUploadingUserImg ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''}`} />
+                      </div>
+                      {isUploadingUserImg && (
+                        <div className="absolute -inset-1 rounded-full border-2 border-transparent border-t-blue-600 border-r-blue-600 animate-spin" />
+                      )}
                     </div>
+
                     <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
-                      Unggah Foto Yang Ingin Dipasang
+                      {isUploadingUserImg ? 'Memuat Foto Kamu...' : 'Unggah Foto Yang Ingin Dipasang'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Mendukung JPG, PNG, WEBP
+                      {isUploadingUserImg ? 'Mohon tunggu sebentar' : 'Mendukung JPG, PNG, WEBP'}
                     </p>
                   </div>
                 </div>
@@ -425,7 +455,7 @@ export default function App() {
                         >
                           {isProcessing ? (
                             <>
-                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <Loader2 className="w-4 h-4 animate-spin" />
                               <span>Memproses...</span>
                             </>
                           ) : (
