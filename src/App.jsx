@@ -310,7 +310,7 @@ export default function App() {
           {frameImg && (
             <div className="space-y-5 w-full">
               
-              {/* KARTU PREVIEW BINGKAI (ROUNDED KEMBALI, TANPA BORDER) */}
+              {/* KARTU PREVIEW BINGKAI */}
               <div className="flex items-center gap-4 p-3.5 bg-gray-50 dark:bg-slate-700/40 rounded-xl border border-gray-200 dark:border-slate-700/80 w-full">
                 <div className="w-14 h-14 bg-checkered rounded-lg flex-shrink-0 overflow-hidden">
                   <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain block" />
@@ -357,7 +357,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* EDITOR CANVAS (ROUNDED-2XL KEMBALI & OVERFLOW-HIDDEN, TANPA BORDER) */}
+              {/* EDITOR CANVAS */}
               {userImg && (
                 <div className="space-y-4 w-full">
                   <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
@@ -395,7 +395,7 @@ export default function App() {
                         <button
                           onClick={handleProcessTwibbon}
                           disabled={isProcessing}
-                          className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                         >
                           {isProcessing ? (
                             <>
@@ -411,33 +411,35 @@ export default function App() {
                         </button>
                       )}
 
+                      {/* AREA 3 TOMBOL SEJAJAR KOTAK & FLEKSIBEL */}
                       {isLocked && (
-                        <div className="space-y-2.5 w-full">
+                        <div className="flex items-center gap-2.5 w-full">
                           <button
                             onClick={handleDownload}
-                            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                            className="flex-1 h-12 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                            title="Unduh Twibbon"
                           >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-5 h-5 flex-shrink-0" />
                             <span>Unduh Twibbon</span>
                           </button>
 
-                          <div className="flex gap-2.5">
-                            <button
-                              onClick={handleShare}
-                              className="flex-1 py-3 px-3 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 text-gray-700 dark:text-gray-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
-                            >
-                              <Share2 className="w-4 h-4" />
-                              <span>Bagikan</span>
-                            </button>
+                          <button
+                            onClick={handleShare}
+                            className="h-12 aspect-square rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center flex-shrink-0"
+                            title="Bagikan"
+                            aria-label="Bagikan"
+                          >
+                            <Share2 className="w-5 h-5" />
+                          </button>
 
-                            <button
-                              onClick={() => setIsLocked(false)}
-                              className="py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"
-                            >
-                              <RefreshCw className="w-4 h-4" />
-                              <span>Edit Lagi</span>
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => setIsLocked(false)}
+                            className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center flex-shrink-0"
+                            title="Edit Lagi"
+                            aria-label="Edit Lagi"
+                          >
+                            <RefreshCw className="w-5 h-5" />
+                          </button>
                         </div>
                       )}
                     </div>
@@ -485,4 +487,4 @@ export default function App() {
 
     </div>
   );
-}        
+}
