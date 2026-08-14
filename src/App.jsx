@@ -522,7 +522,7 @@ export default function App() {
             Mengapa Harus Menggunakan TWIBBONK?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
