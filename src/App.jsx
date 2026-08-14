@@ -310,9 +310,9 @@ export default function App() {
           {frameImg && (
             <div className="space-y-5 w-full">
               
-              {/* KARTU PREVIEW BINGKAI (BORDER BINGKAI PREVIEW DIHAPUS, MENGGUNAKAN CATUR) */}
+              {/* KARTU PREVIEW BINGKAI (ROUNDED KEMBALI, TANPA BORDER) */}
               <div className="flex items-center gap-4 p-3.5 bg-gray-50 dark:bg-slate-700/40 rounded-xl border border-gray-200 dark:border-slate-700/80 w-full">
-                <div className="w-14 h-14 bg-checkered flex-shrink-0 overflow-hidden">
+                <div className="w-14 h-14 bg-checkered rounded-lg flex-shrink-0 overflow-hidden">
                   <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain block" />
                 </div>
 
@@ -357,7 +357,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* EDITOR CANVAS (BORDER LUAR & ROUNDED DIHAPUS AGAR RAPI DAN PAS TANPA STRIP TEPI) */}
+              {/* EDITOR CANVAS (ROUNDED-2XL KEMBALI & OVERFLOW-HIDDEN, TANPA BORDER) */}
               {userImg && (
                 <div className="space-y-4 w-full">
                   <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
@@ -372,10 +372,10 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Container canvas tanpa border tepi, rapat dan bersih dengan pola catur */}
+                    {/* Container canvas ber-rounded-2xl melengkung, tanpa border, background catur */}
                     <div 
                       style={{ aspectRatio: canvasAspectRatio }}
-                      className={`relative w-full bg-checkered touch-none overflow-hidden ${
+                      className={`relative w-full bg-checkered rounded-2xl overflow-hidden touch-none ${
                         isLocked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
                       }`}
                       onMouseDown={handlePointerDown}
@@ -485,4 +485,4 @@ export default function App() {
 
     </div>
   );
-}
+}        
