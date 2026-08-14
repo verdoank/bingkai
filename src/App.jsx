@@ -35,6 +35,7 @@ export default function App() {
     }
   };
 
+  // 1. Alert pada Upload Bingkai
   const handleFrameUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -75,14 +76,20 @@ export default function App() {
       } else {
         setFrameImg(img);
         setFrameDimensions({ width: img.width, height: img.height });
-        setAlert({ type: 'success', message: 'Bingkai transparan valid dan berhasil diunggah!' });
+        setAlert({ type: 'success', message: 'Bingkai transparan berhasil diunggah! Silakan lanjut ke langkah kedua.' });
       }
     };
   };
 
+  // 2. Alert pada Upload Foto Pengguna
   const handleUserImgUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setAlert({ type: 'error', message: 'File yang diunggah harus berupa gambar (JPG, PNG, WEBP)!' });
+      return;
+    }
 
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -92,6 +99,7 @@ export default function App() {
       setScale(1);
       setPosition({ x: 0, y: 0 });
       setIsLocked(false);
+      setAlert({ type: 'success', message: 'Foto berhasil diunggah! Atur posisi & zoom sesuai selera lalu klik "Buat Twibbon".' });
     };
   };
 
@@ -185,22 +193,31 @@ export default function App() {
     setScale((prev) => Math.min(Math.max(prev * (e.deltaY < 0 ? 1.08 : 0.92), 0.2), 5));
   };
 
+  // 3. Alert pada Tombol Buat Twibbon
   const handleProcessTwibbon = () => {
+    if (!userImg) {
+      setAlert({ type: 'error', message: 'Harap unggah foto Anda terlebih dahulu sebelum memproses!' });
+      return;
+    }
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
       setIsLocked(true);
-    }, 1200);
+      setAlert({ type: 'success', message: 'Twibbon selesai dibuat! Klik tombol "Unduh Twibbon" untuk mengunduh hasil gambar.' });
+    }, 1000);
   };
 
+  // 4. Alert pada Tombol Unduh
   const handleDownload = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
     link.download = `Twibbon_BINGKAI_${Date.now()}.png`;
     link.href = canvasRef.current.toDataURL('image/png');
     link.click();
+    setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
   };
 
+  // 5. Alert pada Tombol Bagikan
   const handleShare = async () => {
     if (!canvasRef.current) return;
     canvasRef.current.toBlob(async (blob) => {
@@ -212,13 +229,22 @@ export default function App() {
             text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
             files: [file],
           });
+          setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
         } catch (error) {
-          console.error(error);
+          if (error.name !== 'AbortError') {
+            setAlert({ type: 'error', message: 'Gagal membagikan twibbon secara langsung.' });
+          }
         }
       } else {
-        alert('Fitur berbagi tidak didukung di browser ini, silakan unduh secara langsung.');
+        setAlert({ type: 'error', message: 'Fitur berbagi tidak didukung di browser ini. Silakan unduh gambar secara langsung.' });
       }
     });
+  };
+
+  // 6. Alert pada Tombol Edit Lagi
+  const handleReEdit = () => {
+    setIsLocked(false);
+    setAlert({ type: 'success', message: 'Mode edit diaktifkan. Silakan sesuaikan kembali posisi atau skala foto kamu.' });
   };
 
   const canvasAspectRatio = frameDimensions.width && frameDimensions.height 
@@ -264,7 +290,7 @@ export default function App() {
         {/* WORKFLOW CARD */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-4 sm:p-6 mb-6 w-full">
           
-          {/* ALERT SYSTEM */}
+          {/* DINAMIS ALERT SYSTEM */}
           {alert.message && (
             <div className={`mb-5 p-3.5 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-medium w-full ${
               alert.type === 'error' 
@@ -372,7 +398,7 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Container canvas ber-rounded-2xl melengkung, tanpa border, background catur */}
+                    {/* Container canvas rounded-2xl tanpa border dengan background catur */}
                     <div 
                       style={{ aspectRatio: canvasAspectRatio }}
                       className={`relative w-full bg-checkered rounded-2xl overflow-hidden touch-none ${
@@ -411,7 +437,7 @@ export default function App() {
                         </button>
                       )}
 
-                      {/* AREA 3 TOMBOL SEJAJAR KOTAK & FLEKSIBEL */}
+                      {/* AREA TOMBOL SEJAJAR KOTAK & FLEKSIBEL */}
                       {isLocked && (
                         <div className="flex items-center gap-2.5 w-full">
                           <button
@@ -433,7 +459,7 @@ export default function App() {
                           </button>
 
                           <button
-                            onClick={() => setIsLocked(false)}
+                            onClick={handleReEdit}
                             className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center flex-shrink-0"
                             title="Edit Lagi"
                             aria-label="Edit Lagi"
