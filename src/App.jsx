@@ -274,7 +274,7 @@ export default function App() {
               <Frame className="w-5 h-5" />
             </div>
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400">
-              BINGKAI
+              TWIBBONK
             </span>
           </div>
           <button 
@@ -295,7 +295,7 @@ export default function App() {
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-            BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
+            TWIBBONK memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
         </header>
 
@@ -519,7 +519,7 @@ export default function App() {
         {/* ARTIKEL SEO / INFORMASI */}
         <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
           <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
-            Mengapa Harus Menggunakan BINGKAI?
+            Mengapa Harus Menggunakan TWIBBONK?
           </h2>
           <p className="mb-3">
             Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
@@ -537,7 +537,7 @@ export default function App() {
       {/* FOOTER */}
       <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
         <div className="max-w-[600px] mx-auto px-4">
-          <p>© {new Date().getFullYear()} BINGKAI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} TWIBBONK. All rights reserved.</p>
         </div>
       </footer>
 
