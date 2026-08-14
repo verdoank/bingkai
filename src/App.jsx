@@ -371,7 +371,7 @@ export default function App() {
                     {frameDimensions.width} × {frameDimensions.height} px
                   </p>
                   <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors">
-                    <RefreshCw className="w-3.5 h-3.5" />
+                    <Settings2 className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                   </label>
