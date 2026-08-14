@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sun, Moon, Frame, Upload, RefreshCw, Download, 
+  Sun, Moon, Circle, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
   Sparkles, Image as ImageIcon, ZoomIn, Move, Loader2
 } from 'lucide-react';
