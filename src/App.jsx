@@ -225,7 +225,7 @@ export default function App() {
   const handleDownload = () => {
     if (!canvasRef.current) return;
     const link = document.createElement('a');
-    link.download = `Twibbon_BINGKAI_${Date.now()}.png`;
+    link.download = `Twibbonk_${Date.now()}.png`;
     link.href = canvasRef.current.toDataURL('image/png');
     link.click();
     setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
@@ -281,7 +281,7 @@ export default function App() {
             onClick={toggleTheme}
             className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
           </button>
         </div>
       </nav>
