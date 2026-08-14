@@ -271,7 +271,7 @@ export default function App() {
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 bg-blue-600 rounded-lg text-white shadow-sm">
-              <Frame className="w-5 h-5" />
+              <Circle className="w-5 h-5" />
             </div>
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400">
               TWIBBONK
