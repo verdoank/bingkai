@@ -100,7 +100,6 @@ export default function App() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    // Gunakan dimensi asli dari bingkai gambar yang diunggah
     canvas.width = frameDimensions.width || 1080;
     canvas.height = frameDimensions.height || 1080;
 
@@ -222,7 +221,6 @@ export default function App() {
     });
   };
 
-  // Menghitung aspect ratio secara dinamis agar kontainer canvas pas presisi dengan rasio gambar
   const canvasAspectRatio = frameDimensions.width && frameDimensions.height 
     ? `${frameDimensions.width} / ${frameDimensions.height}` 
     : '1 / 1';
@@ -266,7 +264,7 @@ export default function App() {
         {/* WORKFLOW CARD */}
         <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-gray-100 dark:border-slate-700 p-4 sm:p-6 mb-6 w-full">
           
-          {/* ALERT SYSTEM (PASTI MERAH JIKA ERROR / HIJAU JIKA SUKSES) */}
+          {/* ALERT SYSTEM */}
           {alert.message && (
             <div className={`mb-5 p-3.5 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-medium w-full ${
               alert.type === 'error' 
@@ -312,10 +310,10 @@ export default function App() {
           {frameImg && (
             <div className="space-y-5 w-full">
               
-              {/* KARTU PREVIEW BINGKAI */}
+              {/* KARTU PREVIEW BINGKAI (BORDER BINGKAI PREVIEW DIHAPUS, MENGGUNAKAN CATUR) */}
               <div className="flex items-center gap-4 p-3.5 bg-gray-50 dark:bg-slate-700/40 rounded-xl border border-gray-200 dark:border-slate-700/80 w-full">
-                <div className="w-14 h-14 rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600 bg-gray-200 dark:bg-slate-800 flex-shrink-0">
-                  <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain" />
+                <div className="w-14 h-14 bg-checkered flex-shrink-0 overflow-hidden">
+                  <img src={frameImg.src} alt="Preview Bingkai" className="w-full h-full object-contain block" />
                 </div>
 
                 <div className="flex-1 flex flex-col items-start text-left min-w-0">
@@ -359,7 +357,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* EDITOR CANVAS (SUDAH DIPERBAIKI RASIO & BORDER DIPAS-KAN DENGAN BINGKAI) */}
+              {/* EDITOR CANVAS (BORDER LUAR & ROUNDED DIHAPUS AGAR RAPI DAN PAS TANPA STRIP TEPI) */}
               {userImg && (
                 <div className="space-y-4 w-full">
                   <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
@@ -374,10 +372,10 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Container canvas menyesuaikan aspect ratio bingkai asli secara presisi */}
+                    {/* Container canvas tanpa border tepi, rapat dan bersih dengan pola catur */}
                     <div 
                       style={{ aspectRatio: canvasAspectRatio }}
-                      className={`relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-slate-700 touch-none bg-slate-100 dark:bg-slate-900 ${
+                      className={`relative w-full bg-checkered touch-none overflow-hidden ${
                         isLocked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'
                       }`}
                       onMouseDown={handlePointerDown}
