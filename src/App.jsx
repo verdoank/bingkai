@@ -239,7 +239,7 @@ export default function App() {
         try {
           await navigator.share({
             title: 'Twibbon Saya',
-            text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
+            text: 'Lihat twibbon keren yang saya buat di TWIBBONK!',
             files: [file],
           });
           setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
