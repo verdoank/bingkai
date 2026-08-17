@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sun, Moon, Frame, Upload, RefreshCw, Download, 
+  Sun, Moon, Circle, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
   Sparkles, Image as ImageIcon, ZoomIn, Move, Loader2
 } from 'lucide-react';
@@ -320,7 +320,7 @@ export default function App() {
             className="flex items-center space-x-2 group decoration-0"
             title="BINGKAI - Beranda"
           >
-            <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
+            <Circle className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
               TWIBBONK
             </span>
