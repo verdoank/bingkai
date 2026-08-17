@@ -264,7 +264,7 @@ export default function App() {
       }
 
       const link = document.createElement('a');
-      link.download = `Twibbon_BINGKAI_${Date.now()}.png`;
+      link.download = `TWIBBONK_${Date.now()}.png`;
       link.href = exportCanvas.toDataURL('image/png');
       link.click();
 
