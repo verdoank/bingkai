@@ -19,6 +19,7 @@ export default function App() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isInteracting, setIsInteracting] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
 
   const canvasRef = useRef(null);
@@ -246,19 +247,30 @@ export default function App() {
       setIsProcessing(false);
       setIsLocked(true);
       setAlert({ type: 'success', message: 'Twibbon selesai dibuat! Klik tombol "Unduh Twibbon" untuk mengunduh hasil gambar.' });
-    }, 1000);
+    }, 800);
   };
 
   const handleDownload = () => {
-    const exportCanvas = getCanvasWithWatermark();
-    if (!exportCanvas) return;
+    if (isDownloading) return;
+    
+    // Berikan feedback visual langsung
+    setIsDownloading(true);
 
-    const link = document.createElement('a');
-    link.download = `TWIBBONK_${Date.now()}.png`;
-    link.href = exportCanvas.toDataURL('image/png');
-    link.click();
+    setTimeout(() => {
+      const exportCanvas = getCanvasWithWatermark();
+      if (!exportCanvas) {
+        setIsDownloading(false);
+        return;
+      }
 
-    setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
+      const link = document.createElement('a');
+      link.download = `Twibbon_BINGKAI_${Date.now()}.png`;
+      link.href = exportCanvas.toDataURL('image/png');
+      link.click();
+
+      setIsDownloading(false);
+      setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
+    }, 600);
   };
 
   const handleShare = async () => {
@@ -271,7 +283,7 @@ export default function App() {
         try {
           await navigator.share({
             title: 'Twibbon Saya',
-            text: 'Lihat twibbon keren yang saya buat di TWIBBONK!',
+            text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
             files: [file],
           });
           setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
@@ -306,20 +318,20 @@ export default function App() {
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
-            title="TWIBBONK - Beranda"
+            title="BINGKAI - Beranda"
           >
             <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-              TWIBBONK
+              BINGKAI
             </span>
           </a>
 
           <button 
             onClick={toggleTheme}
-            className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
+            className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
             aria-label="Toggle Mode Gelap/Terang"
           >
-            {darkMode ? <Sun className="w-6 h-6 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
         </div>
       </nav>
@@ -333,7 +345,7 @@ export default function App() {
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-            TWIBBONK memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
+            BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
         </header>
 
@@ -407,7 +419,8 @@ export default function App() {
                   <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {frameDimensions.width} × {frameDimensions.height} px
                   </p>
-                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors">
+                  <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors active:scale-95">
+                    <RefreshCw className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                   </label>
@@ -485,7 +498,7 @@ export default function App() {
                         <button
                           onClick={handleProcessTwibbon}
                           disabled={isProcessing}
-                          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
                         >
                           {isProcessing ? (
                             <>
@@ -503,18 +516,20 @@ export default function App() {
 
                       {isLocked && (
                         <div className="flex items-center gap-2.5 w-full">
+                          {/* TOMBOL UNDUH DENGAN EFEK FEEDBACK DAN BOUNCE ICON */}
                           <button
                             onClick={handleDownload}
-                            className="flex-1 h-12 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                            disabled={isDownloading}
+                            className="flex-1 h-12 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-90"
                             title="Unduh Twibbon"
                           >
-                            <Download className="w-5 h-5 flex-shrink-0" />
-                            <span>Unduh Twibbon</span>
+                            <Download className={`w-5 h-5 flex-shrink-0 ${isDownloading ? 'animate-bounce' : ''}`} />
+                            <span>{isDownloading ? 'Mengunduh...' : 'Unduh Twibbon'}</span>
                           </button>
 
                           <button
                             onClick={handleShare}
-                            className="h-12 aspect-square rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center flex-shrink-0"
+                            className="h-12 aspect-square rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 active:scale-95 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center flex-shrink-0 cursor-pointer"
                             title="Bagikan"
                             aria-label="Bagikan"
                           >
@@ -523,7 +538,7 @@ export default function App() {
 
                           <button
                             onClick={handleReEdit}
-                            className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center flex-shrink-0"
+                            className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 active:scale-95 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center flex-shrink-0 cursor-pointer"
                             title="Edit Lagi"
                             aria-label="Edit Lagi"
                           >
@@ -552,10 +567,10 @@ export default function App() {
         {/* ARTIKEL SEO / INFORMASI */}
         <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
           <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
-            Mengapa Harus Menggunakan TWIBBONK?
+            Mengapa Harus Menggunakan BINGKAI?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
@@ -576,7 +591,7 @@ export default function App() {
               href="/" 
               className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
             >
-              TWIBBONK
+              BINGKAI
             </a>
             . All rights reserved.
           </p>
