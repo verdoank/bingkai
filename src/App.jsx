@@ -155,10 +155,6 @@ export default function App() {
 
   }, [frameImg, userImg, position, scale, isInteracting, frameDimensions, isLocked]);
 
-  /**
-   * Helper internal untuk mengambil Canvas yang sudah diberi Watermark
-   * Tanpa mempengaruhi atau memicu kedipan pada Canvas UI layar
-   */
   const getCanvasWithWatermark = () => {
     if (!canvasRef.current) return null;
 
@@ -167,10 +163,8 @@ export default function App() {
     exportCanvas.height = canvasRef.current.height;
     const ctx = exportCanvas.getContext('2d');
 
-    // Salin hasil canvas utama
     ctx.drawImage(canvasRef.current, 0, 0);
 
-    // Tambahkan Watermark di Pojok Kanan Bawah
     const fontSize = Math.max(14, Math.round(exportCanvas.width * 0.022));
     const padding = Math.max(16, Math.round(exportCanvas.width * 0.025));
 
@@ -179,14 +173,13 @@ export default function App() {
     ctx.textAlign = 'right';
     ctx.textBaseline = 'bottom';
 
-    // Shadow tipis agar teks watermark tetap terlihat jelas di latar terang maupun gelap
     ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
     ctx.shadowBlur = 6;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText('twibbonk.web.app', exportCanvas.width - padding, exportCanvas.height - padding);
+    ctx.fillText('bingkai.app', exportCanvas.width - padding, exportCanvas.height - padding);
     ctx.restore();
 
     return exportCanvas;
@@ -256,7 +249,6 @@ export default function App() {
     }, 1000);
   };
 
-  // Unduh Gambar (Menggunakan Canvas Ber-Watermark)
   const handleDownload = () => {
     const exportCanvas = getCanvasWithWatermark();
     if (!exportCanvas) return;
@@ -269,7 +261,6 @@ export default function App() {
     setAlert({ type: 'success', message: 'Twibbon berhasil diunduh dan tersimpan di perangkat kamu!' });
   };
 
-  // Bagikan Gambar (Menggunakan Canvas Ber-Watermark)
   const handleShare = async () => {
     const exportCanvas = getCanvasWithWatermark();
     if (!exportCanvas) return;
@@ -280,7 +271,7 @@ export default function App() {
         try {
           await navigator.share({
             title: 'Twibbon Saya',
-            text: 'Lihat twibbon keren yang saya buat di TWIBBONK!',
+            text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
             files: [file],
           });
           setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
@@ -310,17 +301,23 @@ export default function App() {
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="p-1.5 bg-blue-600 rounded-lg text-white shadow-sm">
-              <Frame className="w-5 h-5" />
-            </div>
-            <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400">
-              TWIBBONK
+          
+          {/* LINK ANCHOR KANONIKAL LOGO & BRAND */}
+          <a 
+            href="/"
+            className="flex items-center space-x-2 group decoration-0"
+            title="BINGKAI - Beranda"
+          >
+            <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+              BINGKAI
             </span>
-          </div>
+          </a>
+
           <button 
             onClick={toggleTheme}
             className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
+            aria-label="Toggle Mode Gelap/Terang"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
@@ -336,7 +333,7 @@ export default function App() {
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-            TWIBBONK memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
+            BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
         </header>
 
@@ -467,7 +464,6 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Container canvas */}
                     <div 
                       style={{ aspectRatio: canvasAspectRatio }}
                       className={`relative w-full bg-checkered rounded-2xl overflow-hidden touch-none ${
@@ -506,7 +502,6 @@ export default function App() {
                         </button>
                       )}
 
-                      {/* AREA TOMBOL SEJAJAR KOTAK & FLEKSIBEL */}
                       {isLocked && (
                         <div className="flex items-center gap-2.5 w-full">
                           <button
@@ -558,10 +553,10 @@ export default function App() {
         {/* ARTIKEL SEO / INFORMASI */}
         <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
           <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
-            Mengapa Harus Menggunakan TWIBBONK?
+            Mengapa Harus Menggunakan BINGKAI?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
@@ -573,10 +568,19 @@ export default function App() {
 
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER DENGAN LINK ANCHOR STANDAR */}
       <footer className="border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 text-center text-xs text-gray-500 dark:text-gray-400">
         <div className="max-w-[600px] mx-auto px-4">
-          <p>© {new Date().getFullYear()} TWIBBONK. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()}{' '}
+            <a 
+              href="/" 
+              className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              BINGKAI
+            </a>
+            . All rights reserved.
+          </p>
         </div>
       </footer>
 
