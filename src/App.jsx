@@ -179,7 +179,7 @@ export default function App() {
     ctx.shadowOffsetY = 1;
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText('bingkai.app', exportCanvas.width - padding, exportCanvas.height - padding);
+    ctx.fillText('TWIBBONK.WEB.APP', exportCanvas.width - padding, exportCanvas.height - padding);
     ctx.restore();
 
     return exportCanvas;
@@ -254,7 +254,7 @@ export default function App() {
     if (!exportCanvas) return;
 
     const link = document.createElement('a');
-    link.download = `Twibbon_BINGKAI_${Date.now()}.png`;
+    link.download = `TWIBBONK_${Date.now()}.png`;
     link.href = exportCanvas.toDataURL('image/png');
     link.click();
 
@@ -271,7 +271,7 @@ export default function App() {
         try {
           await navigator.share({
             title: 'Twibbon Saya',
-            text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
+            text: 'Lihat twibbon keren yang saya buat di TWIBBONK!',
             files: [file],
           });
           setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
@@ -306,11 +306,11 @@ export default function App() {
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
-            title="BINGKAI - Beranda"
+            title="TWIBBONK - Beranda"
           >
             <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-              BINGKAI
+              TWIBBONK
             </span>
           </a>
 
@@ -319,7 +319,7 @@ export default function App() {
             className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all"
             aria-label="Toggle Mode Gelap/Terang"
           >
-            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            {darkMode ? <Sun className="w-6 h-6 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
         </div>
       </nav>
@@ -333,7 +333,7 @@ export default function App() {
             Solusi Pasang Twibbon Instan Tanpa Ribet
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
-            BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
+            TWIBBONK memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye, acara, atau kegiatan komunitas secara cepat, presisi, dan menjaga kualitas foto tetap tinggi.
           </p>
         </header>
 
@@ -408,7 +408,6 @@ export default function App() {
                     {frameDimensions.width} × {frameDimensions.height} px
                   </p>
                   <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors">
-                    <RefreshCw className="w-3.5 h-3.5" />
                     <span>Ganti Bingkai</span>
                     <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                   </label>
@@ -553,10 +552,10 @@ export default function App() {
         {/* ARTIKEL SEO / INFORMASI */}
         <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
           <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
-            Mengapa Harus Menggunakan BINGKAI?
+            Mengapa Harus Menggunakan TWIBBONK?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
@@ -577,7 +576,7 @@ export default function App() {
               href="/" 
               className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
             >
-              BINGKAI
+              TWIBBONK
             </a>
             . All rights reserved.
           </p>
