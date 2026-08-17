@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sun, Moon, Circle, Upload, RefreshCw, Download, 
+  Sun, Moon, Circle, Upload, Maximize2, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
   Sparkles, Image as ImageIcon, ZoomIn, Move, Loader2
 } from 'lucide-react';
@@ -542,7 +542,7 @@ export default function App() {
                             title="Edit Lagi"
                             aria-label="Edit Lagi"
                           >
-                            <RefreshCw className="w-5 h-5" />
+                            <Maximize2 className="w-5 h-5" />
                           </button>
                         </div>
                       )}
