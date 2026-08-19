@@ -318,7 +318,7 @@ export default function App() {
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
-            title="BINGKAI - Beranda"
+            title="Twibbonk - Beranda"
           >
             <Circle className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
