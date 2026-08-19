@@ -311,7 +311,7 @@ export default function App() {
     <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
       
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xs border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           
           {/* LINK ANCHOR KANONIKAL LOGO & BRAND */}
