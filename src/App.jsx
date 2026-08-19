@@ -331,7 +331,7 @@ export default function App() {
             className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
             aria-label="Toggle Mode Gelap/Terang"
           >
-            {darkMode ? <Sun className="w-6 h-6 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            {darkMode ? <Sun className="w-6 h-6 text-amber-400" /> : <Moon className="w-6 h-6 text-slate-700" />}
           </button>
         </div>
       </nav>
