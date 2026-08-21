@@ -61,20 +61,27 @@ export default function App() {
     setScale(1);
     setPosition({ x: 0, y: 0 });
 
-    if (tab === 'default') {
-      loadDefaultFrame();
-    } else {
+    if (tab === 'custom') {
       setFrameImg(null);
       setFrameDimensions({ width: 0, height: 0 });
       setAlert({ type: '', message: '' });
     }
   };
 
-  // Memuat file bingkai default /twibbon.png
+  // Memuat file bingkai default /twibbon.png dengan fallback path yang presisi
   const loadDefaultFrame = () => {
     setIsUploadingFrame(true);
+    setAlert({ type: '', message: '' });
+
     const img = new Image();
-    img.src = '/twibbon.png';
+    
+    // Penanganan path dynamic Vite / Production BASE_URL
+    const baseUrl = import.meta.env?.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+    const targetSrc = `${cleanBase}twibbon.png?v=${Date.now()}`; // tambahkan cache buster timestamp
+
+    img.crossOrigin = 'anonymous';
+    img.src = targetSrc;
 
     img.onload = () => {
       setFrameImg(img);
@@ -87,13 +94,37 @@ export default function App() {
     };
 
     img.onerror = () => {
-      setIsUploadingFrame(false);
-      setAlert({ 
-        type: 'error', 
-        message: 'Gagal memuat twibbon.png bawaan. Pastikan file "twibbon.png" ada di folder public!' 
-      });
+      // Fallback manual jika base url gagal
+      const fallbackImg = new Image();
+      fallbackImg.crossOrigin = 'anonymous';
+      fallbackImg.src = './twibbon.png';
+
+      fallbackImg.onload = () => {
+        setFrameImg(fallbackImg);
+        setFrameDimensions({ width: fallbackImg.width, height: fallbackImg.height });
+        setIsUploadingFrame(false);
+        setAlert({ 
+          type: 'success', 
+          message: 'Bingkai bawaan (twibbon.png) berhasil dimuat! Silakan unggah foto kamu.' 
+        });
+      };
+
+      fallbackImg.onerror = () => {
+        setIsUploadingFrame(false);
+        setAlert({ 
+          type: 'error', 
+          message: 'Gagal memuat twibbon.png bawaan. Pastikan file "twibbon.png" ada di folder public/ root hosting.' 
+        });
+      };
     };
   };
+
+  // Panggil muat gambar otomatis setiap kali berpindah ke tab 'default'
+  useEffect(() => {
+    if (activeTab === 'default') {
+      loadDefaultFrame();
+    }
+  }, [activeTab]);
 
   // Menutup dropdown & drawer saat klik di luar area
   useEffect(() => {
