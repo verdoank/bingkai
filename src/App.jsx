@@ -21,13 +21,31 @@ export default function App() {
   const [isUploadingFrame, setIsUploadingFrame] = useState(false);
   const [isUploadingUserImg, setIsUploadingUserImg] = useState(false);
 
-  // State Pesan Loading Interaktif & Variasi Pesannya
+  // State Pesan Loading Interaktif
   const [loadingMessage, setLoadingMessage] = useState('');
-  const loadingMessages = [
-    'Sedang mengunduh bingkai twibbon...',
-    'Menyiapkan kanvas & kualitas gambar...',
-    'Hampir selesai, sebentar lagi...',
-    'Memastikan transparansi sempurna...'
+
+  // 1. Pesan khusus untuk proses memuat Bingkai Default bawaan
+  const defaultFrameMessages = [
+    'Sedang mengunduh bingkai twibbon bawaan...',
+    'Menyiapkan kanvas & kualitas bingkai...',
+    'Memeriksa transparansi bingkai...',
+    'Hampir selesai, bingkai siap digunakan...'
+  ];
+
+  // 2. Pesan khusus untuk proses memuat Bingkai PNG Custom milik User
+  const customFrameMessages = [
+    'Membaca file bingkai PNG...',
+    'Memeriksa area transparansi bingkai...',
+    'Menyesuaikan ukuran kanvas...',
+    'Bingkai siap, sebentar lagi...'
+  ];
+
+  // 3. Pesan khusus untuk proses memuat Foto Pengguna
+  const userImgMessages = [
+    'Mengunggah foto kamu...',
+    'Optimalisasi resolusi foto...',
+    'Menyeimbangkan posisi ke dalam bingkai...',
+    'Foto berhasil dimuat! Siap diatur...'
   ];
 
   const [scale, setScale] = useState(1);
@@ -49,23 +67,32 @@ export default function App() {
   const posStartRef = useRef({ x: 0, y: 0 });
   const scaleStartRef = useRef(1);
 
-  // Interval untuk pesan loading yang berganti-ganti secara otomatis
+  // Interval untuk memutar pesan loading sesuai konteks aksinya
   useEffect(() => {
     let interval;
-    if (isUploadingFrame || isUploadingUserImg) {
+    
+    // Tentukan daftar pesan mana yang akan diputar
+    let targetMessages = [];
+    if (isUploadingFrame) {
+      targetMessages = activeTab === 'default' ? defaultFrameMessages : customFrameMessages;
+    } else if (isUploadingUserImg) {
+      targetMessages = userImgMessages;
+    }
+
+    if (targetMessages.length > 0) {
       let messageIndex = 0;
-      setLoadingMessage(loadingMessages[0]);
+      setLoadingMessage(targetMessages[0]);
       
       interval = setInterval(() => {
-        messageIndex = (messageIndex + 1) % loadingMessages.length;
-        setLoadingMessage(loadingMessages[messageIndex]);
-      }, 1500); // Pesan berganti setiap 1.5 detik
+        messageIndex = (messageIndex + 1) % targetMessages.length;
+        setLoadingMessage(targetMessages[messageIndex]);
+      }, 1200); // Pesan berganti setiap 1.2 detik
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isUploadingFrame, isUploadingUserImg]);
+  }, [isUploadingFrame, isUploadingUserImg, activeTab]);
 
   const toggleTheme = () => {
     if (darkMode) {
@@ -79,7 +106,6 @@ export default function App() {
     }
   };
 
-  // Menangani penggantian mode halaman (Custom vs Default)
   const switchTab = (tab) => {
     setActiveTab(tab);
     setIsMenuOpen(false);
@@ -95,14 +121,12 @@ export default function App() {
     }
   };
 
-  // Memuat file bingkai default /twibbon.png dengan penanganan pesan interaktif
+  // Memuat file bingkai default /twibbon.png
   const loadDefaultFrame = () => {
     setIsUploadingFrame(true);
     setAlert({ type: '', message: '' });
 
     const img = new Image();
-    
-    // Penanganan path dynamic Vite / Production BASE_URL
     const baseUrl = import.meta.env?.BASE_URL || '/';
     const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
     const targetSrc = `${cleanBase}twibbon.png?v=${Date.now()}`;
@@ -121,7 +145,6 @@ export default function App() {
     };
 
     img.onerror = () => {
-      // Fallback manual jika base url utama gagal
       const fallbackImg = new Image();
       fallbackImg.crossOrigin = 'anonymous';
       fallbackImg.src = './twibbon.png';
@@ -146,14 +169,12 @@ export default function App() {
     };
   };
 
-  // Panggil muat gambar otomatis setiap kali berpindah ke tab 'default'
   useEffect(() => {
     if (activeTab === 'default') {
       loadDefaultFrame();
     }
   }, [activeTab]);
 
-  // Menutup dropdown & drawer saat klik di luar area
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -588,7 +609,7 @@ export default function App() {
                   )}
                 </div>
 
-                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
+                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
                   {isUploadingFrame ? loadingMessage : 'Unggah File Bingkai PNG Transparan'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -611,7 +632,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* TAMPILKAN PESAN DYNAMIS INTERAKTIF */}
                 <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
                   {loadingMessage || 'Sedang memuat bingkai bawaan...'}
                 </p>
