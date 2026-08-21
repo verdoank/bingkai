@@ -21,6 +21,15 @@ export default function App() {
   const [isUploadingFrame, setIsUploadingFrame] = useState(false);
   const [isUploadingUserImg, setIsUploadingUserImg] = useState(false);
 
+  // State Pesan Loading Interaktif & Variasi Pesannya
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const loadingMessages = [
+    'Sedang mengunduh bingkai twibbon...',
+    'Menyiapkan kanvas & kualitas gambar...',
+    'Hampir selesai, sebentar lagi...',
+    'Memastikan transparansi sempurna...'
+  ];
+
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isInteracting, setIsInteracting] = useState(false);
@@ -29,7 +38,7 @@ export default function App() {
   const [isLocked, setIsLocked] = useState(false);
 
   // Opsi format unduhan & state dropdown
-  const [downloadFormat, setDownloadFormat] = useState('png'); // 'png' atau 'jpg'
+  const [downloadFormat, setDownloadFormat] = useState('png');
   const [isFormatMenuOpen, setIsFormatMenuOpen] = useState(false);
   
   const dropdownRef = useRef(null);
@@ -39,6 +48,24 @@ export default function App() {
   const touchStartRef = useRef({ x: 0, y: 0, dist: 0 });
   const posStartRef = useRef({ x: 0, y: 0 });
   const scaleStartRef = useRef(1);
+
+  // Interval untuk pesan loading yang berganti-ganti secara otomatis
+  useEffect(() => {
+    let interval;
+    if (isUploadingFrame || isUploadingUserImg) {
+      let messageIndex = 0;
+      setLoadingMessage(loadingMessages[0]);
+      
+      interval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % loadingMessages.length;
+        setLoadingMessage(loadingMessages[messageIndex]);
+      }, 1500); // Pesan berganti setiap 1.5 detik
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isUploadingFrame, isUploadingUserImg]);
 
   const toggleTheme = () => {
     if (darkMode) {
@@ -68,7 +95,7 @@ export default function App() {
     }
   };
 
-  // Memuat file bingkai default /twibbon.png dengan fallback path yang presisi
+  // Memuat file bingkai default /twibbon.png dengan penanganan pesan interaktif
   const loadDefaultFrame = () => {
     setIsUploadingFrame(true);
     setAlert({ type: '', message: '' });
@@ -78,7 +105,7 @@ export default function App() {
     // Penanganan path dynamic Vite / Production BASE_URL
     const baseUrl = import.meta.env?.BASE_URL || '/';
     const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-    const targetSrc = `${cleanBase}twibbon.png?v=${Date.now()}`; // tambahkan cache buster timestamp
+    const targetSrc = `${cleanBase}twibbon.png?v=${Date.now()}`;
 
     img.crossOrigin = 'anonymous';
     img.src = targetSrc;
@@ -94,7 +121,7 @@ export default function App() {
     };
 
     img.onerror = () => {
-      // Fallback manual jika base url gagal
+      // Fallback manual jika base url utama gagal
       const fallbackImg = new Image();
       fallbackImg.crossOrigin = 'anonymous';
       fallbackImg.src = './twibbon.png';
@@ -433,7 +460,6 @@ export default function App() {
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-[600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           
-          {/* LINK ANCHOR LOGO & BRAND */}
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
@@ -446,7 +472,6 @@ export default function App() {
           </a>
 
           <div className="flex items-center gap-2" ref={menuRef}>
-            {/* TOGGLE THEME */}
             <button 
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
@@ -455,7 +480,6 @@ export default function App() {
               {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
-            {/* BURGER MENU BUTTON */}
             <button
               onClick={() => setIsMenuOpen((prev) => !prev)}
               className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
@@ -464,7 +488,6 @@ export default function App() {
               {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
 
-            {/* DRAWER BURGER MENU RINGKAS */}
             {isMenuOpen && (
               <div className="absolute top-14 right-4 w-56 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150">
                 <p className="px-3 py-1.5 text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase">
@@ -566,10 +589,34 @@ export default function App() {
                 </div>
 
                 <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
-                  {isUploadingFrame ? 'Memeriksa Transparansi Bingkai...' : 'Unggah File Bingkai PNG Transparan'}
+                  {isUploadingFrame ? loadingMessage : 'Unggah File Bingkai PNG Transparan'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {isUploadingFrame ? 'Mohon tunggu sebentar' : 'Pastikan bingkai memiliki bidang transparan'}
+                  {isUploadingFrame ? 'Mohon tunggu sebentar...' : 'Pastikan bingkai memiliki bidang transparan'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* STATE LOADING UNTUK TAB DEFAULT (BINGKAI BAWAAN) */}
+          {activeTab === 'default' && !frameImg && (
+            <div className="space-y-3 w-full">
+              <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
+                Memuat Bingkai Default
+              </h2>
+              <div className="relative aspect-square w-full border-2 border-dashed border-blue-200 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center p-6 text-center bg-blue-50/30 dark:bg-slate-800/50">
+                <div className="relative mb-3">
+                  <div className="p-4 rounded-full bg-blue-100 dark:bg-slate-700 text-blue-600 dark:text-blue-400">
+                    <Loader2 className="w-7 h-7 animate-spin text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+
+                {/* TAMPILKAN PESAN DYNAMIS INTERAKTIF */}
+                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
+                  {loadingMessage || 'Sedang memuat bingkai bawaan...'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Proses ini tergantung kecepatan koneksi internet kamu
                 </p>
               </div>
             </div>
@@ -627,11 +674,11 @@ export default function App() {
                       )}
                     </div>
 
-                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
-                      {isUploadingUserImg ? 'Memuat Foto Kamu...' : 'Unggah Foto Yang Ingin Dipasang'}
+                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
+                      {isUploadingUserImg ? loadingMessage : 'Unggah Foto Yang Ingin Dipasang'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {isUploadingUserImg ? 'Mohon tunggu sebentar' : 'Mendukung JPG, PNG, WEBP'}
+                      {isUploadingUserImg ? 'Mohon tunggu sebentar...' : 'Mendukung JPG, PNG, WEBP'}
                     </p>
                   </div>
                 </div>
