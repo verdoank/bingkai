@@ -498,7 +498,7 @@ export default function App() {
               className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
               aria-label="Toggle Mode Gelap/Terang"
             >
-              {darkMode ? <Sun className="w-6 h-6 text-amber-400" /> : <Moon className="w-6 h-6 text-slate-700" />}
+              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
             </button>
 
             <button
@@ -506,7 +506,7 @@ export default function App() {
               className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
               aria-label="Buka Menu Navigasi"
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
 
             {isMenuOpen && (
@@ -867,7 +867,7 @@ export default function App() {
             Mengapa Harus Menggunakan TWIBBONK?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
