@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth Theme Transition (Mencegah kedip / flicker saat ganti mode) */
+*, ::before, ::after {
+  transition-property: color, background-color, border-color, outline-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
 /* Custom Soft Checkered Background */
 .bg-checkered {
   background-color: #f8fafc;
