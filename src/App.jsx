@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sun, Moon, Circle, Upload, Settings2, Download, 
+  Sun, Moon, Frame, Upload, RefreshCw, Download, 
   Share2, AlertCircle, CheckCircle2, ShieldCheck, 
   Sparkles, Image as ImageIcon, ZoomIn, Move, Loader2,
   ChevronDown, Check, Menu, X, Layers
 } from 'lucide-react';
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') || localStorage.getItem('theme') === 'dark';
+    }
+    return false;
+  });
   
-  // State Navigasi Halaman (Disimpan di localStorage agar bertahan saat di-refresh)
+  // State Navigasi Halaman
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('activeTab') || 'custom';
   });
@@ -27,7 +32,6 @@ export default function App() {
   // State Pesan Loading Interaktif
   const [loadingMessage, setLoadingMessage] = useState('');
 
-  // 1. Pesan khusus untuk proses memuat Bingkai Default bawaan
   const defaultFrameMessages = [
     'Sedang mengunduh bingkai twibbon bawaan...',
     'Menyiapkan kanvas & kualitas bingkai...',
@@ -35,7 +39,6 @@ export default function App() {
     'Hampir selesai, bingkai siap digunakan...'
   ];
 
-  // 2. Pesan khusus untuk proses memuat Bingkai PNG Custom milik User
   const customFrameMessages = [
     'Membaca file bingkai PNG...',
     'Memeriksa area transparansi bingkai...',
@@ -43,7 +46,6 @@ export default function App() {
     'Bingkai siap, sebentar lagi...'
   ];
 
-  // 3. Pesan khusus untuk proses memuat Foto Pengguna
   const userImgMessages = [
     'Mengunggah foto kamu...',
     'Optimalisasi resolusi foto...',
@@ -58,7 +60,6 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
 
-  // Opsi format unduhan & state dropdown
   const [downloadFormat, setDownloadFormat] = useState('png');
   const [isFormatMenuOpen, setIsFormatMenuOpen] = useState(false);
   
@@ -70,7 +71,22 @@ export default function App() {
   const posStartRef = useRef({ x: 0, y: 0 });
   const scaleStartRef = useRef(1);
 
-  // Simpan perubahan tab ke localStorage
+  // Sinkronisasi kelas 'dark' di root HTML dengan state
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
+
+  const toggleTheme = () => {
+    setDarkMode((prev) => !prev);
+  };
+
   const switchTab = (tab) => {
     setActiveTab(tab);
     localStorage.setItem('activeTab', tab);
@@ -87,10 +103,8 @@ export default function App() {
     }
   };
 
-  // Interval untuk memutar pesan loading sesuai konteks aksinya
   useEffect(() => {
     let interval;
-    
     let targetMessages = [];
     if (isUploadingFrame) {
       targetMessages = activeTab === 'default' ? defaultFrameMessages : customFrameMessages;
@@ -113,19 +127,6 @@ export default function App() {
     };
   }, [isUploadingFrame, isUploadingUserImg, activeTab]);
 
-  const toggleTheme = () => {
-    if (darkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setDarkMode(true);
-    }
-  };
-
-  // Memuat file bingkai default /twibbon.png
   const loadDefaultFrame = () => {
     setIsUploadingFrame(true);
     setAlert({ type: '', message: '' });
@@ -342,7 +343,7 @@ export default function App() {
     ctx.shadowOffsetY = 1;
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText('TWIBBONK.WEB.APP', exportCanvas.width - padding, exportCanvas.height - padding);
+    ctx.fillText('bingkai.app', exportCanvas.width - padding, exportCanvas.height - padding);
     ctx.restore();
 
     return exportCanvas;
@@ -429,7 +430,7 @@ export default function App() {
       const extension = selectedFormat === 'jpg' ? 'jpg' : 'png';
 
       const link = document.createElement('a');
-      link.download = `TWIBBONK.WEB.APP_${Date.now()}.${extension}`;
+      link.download = `Twibbon_BINGKAI_${Date.now()}.${extension}`;
       link.href = exportCanvas.toDataURL(mimeType, 0.92);
       link.click();
 
@@ -454,7 +455,7 @@ export default function App() {
         try {
           await navigator.share({
             title: 'Twibbon Saya',
-            text: 'Lihat twibbon keren yang saya buat di TWIBBONK!',
+            text: 'Lihat twibbon keren yang saya buat di BINGKAI!',
             files: [file],
           });
           setAlert({ type: 'success', message: 'Menu berbagi berhasil dibuka!' });
@@ -479,7 +480,7 @@ export default function App() {
     : '1 / 1';
 
   return (
-    <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col justify-between font-sans bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-100">
       
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800">
@@ -488,18 +489,18 @@ export default function App() {
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
-            title="TWIBBONK - Beranda"
+            title="BINGKAI - Beranda"
           >
-            <Circle className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform duration-300" />
-            <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-              TWIBBONK
+            <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12" />
+            <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+              BINGKAI
             </span>
           </a>
 
           <div className="flex items-center gap-2" ref={menuRef}>
             <button 
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 active:scale-95"
               aria-label="Toggle Mode Gelap/Terang"
             >
               {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
@@ -507,7 +508,7 @@ export default function App() {
 
             <button
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 active:scale-95"
               aria-label="Buka Menu Navigasi"
             >
               {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -521,7 +522,7 @@ export default function App() {
                 <div className="space-y-1">
                   <button
                     onClick={() => switchTab('custom')}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-colors ${
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 ${
                       activeTab === 'custom'
                         ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700'
@@ -536,7 +537,7 @@ export default function App() {
 
                   <button
                     onClick={() => switchTab('default')}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-colors ${
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 ${
                       activeTab === 'default'
                         ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700'
@@ -566,7 +567,7 @@ export default function App() {
           <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed max-w-lg mx-auto">
             {activeTab === 'default'
               ? 'Gunakan bingkai default bawaan (twibbon.png) tanpa perlu mengunggah berkas bingkai tersendiri.'
-              : 'TWIBBONK memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye secara cepat dan presisi.'}
+              : 'BINGKAI memudahkan Anda menggabungkan foto pribadi ke dalam bingkai kampanye secara cepat dan presisi.'}
           </p>
         </header>
 
@@ -595,7 +596,7 @@ export default function App() {
               <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
                 Langkah Pertama: Unggah Bingkai
               </h2>
-              <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 transition-all group">
+              <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/50 dark:bg-slate-800/50 group">
                 <input 
                   type="file" 
                   accept="image/png" 
@@ -605,7 +606,7 @@ export default function App() {
                 />
                 
                 <div className="relative mb-3">
-                  <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 transition-transform ${isUploadingFrame ? 'scale-110' : 'group-hover:scale-105'}`}>
+                  <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 ${isUploadingFrame ? 'scale-110' : 'group-hover:scale-105'}`}>
                     <Upload className={`w-7 h-7 ${isUploadingFrame ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''}`} />
                   </div>
                   {isUploadingFrame && (
@@ -613,7 +614,7 @@ export default function App() {
                   )}
                 </div>
 
-                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
+                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
                   {isUploadingFrame ? loadingMessage : 'Unggah File Bingkai PNG Transparan'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -636,7 +637,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
+                <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
                   {loadingMessage || 'Sedang memuat bingkai bawaan...'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -665,8 +666,8 @@ export default function App() {
                   </p>
 
                   {activeTab === 'custom' && (
-                    <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold transition-colors active:scale-95">
-                      
+                    <label className="mt-1 cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500 text-xs font-semibold active:scale-95">
+                      <RefreshCw className="w-3.5 h-3.5" />
                       <span>Ganti Bingkai</span>
                       <input type="file" accept="image/png" onChange={handleFrameUpload} className="hidden" />
                     </label>
@@ -680,7 +681,7 @@ export default function App() {
                   <h2 className="text-base font-bold text-gray-900 dark:text-white text-left">
                     Unggah Foto Kamu
                   </h2>
-                  <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/30 dark:bg-slate-800/50 transition-all group">
+                  <div className="relative aspect-square w-full border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 rounded-2xl flex flex-col items-center justify-center p-6 text-center cursor-pointer bg-gray-50/30 dark:bg-slate-800/50 group">
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -690,7 +691,7 @@ export default function App() {
                     />
 
                     <div className="relative mb-3">
-                      <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 transition-transform ${isUploadingUserImg ? 'scale-110' : 'group-hover:scale-105'}`}>
+                      <div className={`p-4 rounded-full bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 ${isUploadingUserImg ? 'scale-110' : 'group-hover:scale-105'}`}>
                         <ImageIcon className={`w-7 h-7 ${isUploadingUserImg ? 'animate-bounce text-blue-600 dark:text-blue-400' : ''}`} />
                       </div>
                       {isUploadingUserImg && (
@@ -698,7 +699,7 @@ export default function App() {
                       )}
                     </div>
 
-                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1 transition-all duration-300">
+                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100 mb-1">
                       {isUploadingUserImg ? loadingMessage : 'Unggah Foto Yang Ingin Dipasang'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -745,7 +746,7 @@ export default function App() {
                         <button
                           onClick={handleProcessTwibbon}
                           disabled={isProcessing}
-                          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
+                          className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-80"
                         >
                           {isProcessing ? (
                             <>
@@ -769,7 +770,7 @@ export default function App() {
                             <button
                               onClick={() => handleDownload(downloadFormat)}
                               disabled={isDownloading}
-                              className="flex-1 h-12 px-3 sm:px-4 rounded-l-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-90"
+                              className="flex-1 h-12 px-3 sm:px-4 rounded-l-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-90"
                               title={`Unduh format ${downloadFormat.toUpperCase()}`}
                             >
                               <Download className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${isDownloading ? 'animate-bounce' : ''}`} />
@@ -779,11 +780,11 @@ export default function App() {
                             <button
                               onClick={() => setIsFormatMenuOpen((prev) => !prev)}
                               disabled={isDownloading}
-                              className="h-12 px-2.5 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white rounded-r-xl border-l border-emerald-500/40 transition-all flex items-center justify-center cursor-pointer"
+                              className="h-12 px-2.5 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white rounded-r-xl border-l border-emerald-500/40 flex items-center justify-center cursor-pointer"
                               title="Pilih Format Unduhan (.png / .jpg)"
                               aria-label="Pilih Format Unduhan"
                             >
-                              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isFormatMenuOpen ? 'rotate-180' : ''}`} />
+                              <ChevronDown className={`w-4 h-4 ${isFormatMenuOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             {/* MENU DROPDOWN FORMAT */}
@@ -796,7 +797,7 @@ export default function App() {
 
                                   <button
                                     onClick={() => handleSelectFormat('png')}
-                                    className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                                    className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between ${
                                       downloadFormat === 'png' 
                                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' 
                                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700'
@@ -811,7 +812,7 @@ export default function App() {
 
                                   <button
                                     onClick={() => handleSelectFormat('jpg')}
-                                    className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors ${
+                                    className={`w-full px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between ${
                                       downloadFormat === 'jpg' 
                                         ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' 
                                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700'
@@ -830,7 +831,7 @@ export default function App() {
 
                           <button
                             onClick={handleShare}
-                            className="h-12 aspect-square rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 active:scale-95 text-gray-700 dark:text-gray-200 font-semibold transition-all flex items-center justify-center flex-shrink-0 cursor-pointer"
+                            className="h-12 aspect-square rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 active:scale-95 text-gray-700 dark:text-gray-200 font-semibold flex items-center justify-center flex-shrink-0 cursor-pointer"
                             title="Bagikan"
                             aria-label="Bagikan"
                           >
@@ -839,11 +840,11 @@ export default function App() {
 
                           <button
                             onClick={handleReEdit}
-                            className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 active:scale-95 text-gray-600 dark:text-gray-300 font-semibold transition-all flex items-center justify-center flex-shrink-0 cursor-pointer"
+                            className="h-12 aspect-square rounded-xl border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 active:scale-95 text-gray-600 dark:text-gray-300 font-semibold flex items-center justify-center flex-shrink-0 cursor-pointer"
                             title="Edit Lagi"
                             aria-label="Edit Lagi"
                           >
-                            <Settings2 className="w-5 h-5" />
+                            <RefreshCw className="w-5 h-5" />
                           </button>
                         </div>
                       )}
@@ -868,10 +869,10 @@ export default function App() {
         {/* ARTIKEL SEO / INFORMASI */}
         <article className="bg-white dark:bg-slate-800 rounded-2xl p-5 sm:p-6 border border-gray-100 dark:border-slate-700 shadow-sm text-gray-600 dark:text-gray-300 text-xs sm:text-sm leading-relaxed text-left w-full">
           <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5">
-            Mengapa Harus Menggunakan TWIBBONK?
+            Mengapa Harus Menggunakan BINGKAI?
           </h2>
           <p className="mb-3">
-            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **TWIBBONK** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
+            Di era digital saat ini, twibbon menjadi media yang sangat efektif untuk mengampanyekan gerakan, merayakan momen penting, hingga meningkatkan kesadaran suatu acara. **BINGKAI** hadir untuk memberikan pengalaman pembuatan twibbon yang instan, mudah, dan profesional.
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Tanpa Registrasi:</strong> Langsung pakai tanpa perlu membuat akun atau login.</li>
@@ -892,7 +893,7 @@ export default function App() {
               href="/" 
               className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
             >
-              TWIBBONK
+              BINGKAI
             </a>
             . All rights reserved.
           </p>
