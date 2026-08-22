@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Frame, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Home, Circle, ArrowLeft, Sun, Moon } from 'lucide-react';
 
 export default function NotFound() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -32,11 +32,11 @@ export default function NotFound() {
           <a 
             href="/"
             className="flex items-center space-x-2 group decoration-0"
-            title="BINGKAI - Beranda"
+            title="TWIBBONK - Beranda"
           >
-            <Frame className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12" />
+            <Circle className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:rotate-12" />
             <span className="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400">
-              BINGKAI
+              TWIBBONK
             </span>
           </a>
 
@@ -60,7 +60,7 @@ export default function NotFound() {
               404
             </span>
             <div className="absolute p-4 rounded-2xl bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-slate-600">
-              <Frame className="w-10 h-10 animate-pulse" />
+              <Circle className="w-10 h-10 animate-pulse" />
             </div>
           </div>
 
@@ -100,7 +100,7 @@ export default function NotFound() {
           <p>
             © {new Date().getFullYear()}{' '}
             <a href="/" className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
-              BINGKAI
+              TWIBBONK
             </a>
             . All rights reserved.
           </p>
