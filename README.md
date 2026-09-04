@@ -6,10 +6,9 @@ twibbonk.web.app **Indonesia** **Twibbonk (twibbonk.web.app)** is a web-based, w
 
 *   **Watermark-Free Downloads:** Unlike many current alternatives, it allows users to download their finished profile frames cleanly without mandatory branding.
     
-*   **No Installation Required:** As a Progressive Web App (PWA) hosted via Firebase (.web.app), it runs instantly inside any standard mobile or desktop browser. \[\]
+*   **No Installation Required:** As a Progressive Web App (PWA) hosted via Firebase (.web.app), it runs instantly inside any standard mobile or desktop browser.
     
-*   **Lightweight Performance:** Optimized for low data usage and quick image processing. \[[1](https://twib.my.id/)\]
-    
+*   **Lightweight Performance:** Optimized for low data usage and quick image processing.
 
 Common Use CasesPeople use the platform to generate promotional frame templates for:
 
